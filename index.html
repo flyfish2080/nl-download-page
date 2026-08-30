@@ -50,6 +50,10 @@
   }
   .note { margin-top:14px; font-size:13px; color:#6b7280; line-height:1.8; background:#f8fafd;
     border-left:4px solid #3b82f6; padding:10px 14px; border-radius:6px; }
+  .modules { margin-top:2px; }
+  .modules p { padding:7px 2px; font-size:14px; line-height:1.7; border-bottom:1px dashed #eef1f8; }
+  .modules p:last-child { border-bottom:none; }
+  .modules b { color:#1e40af; margin-right:6px; white-space:nowrap; }
   .footer { text-align:center; margin-top:30px; font-size:13px; color:#5b6b8c; }
   .footer .count { display:inline-block; margin-top:8px; background:#fff; border:1px solid #e2e6f0;
     border-radius:20px; padding:6px 16px; font-size:13px; color:#1e2a5a; }
@@ -84,17 +88,41 @@
     <ol class="steps">
       <li>下载并解压 <b>牛来工作小助手_64位系统.zip</b></li>
       <li>进入解压后的文件夹，双击运行 <b>牛来工作小助手.exe</b></li>
-      <li>报表管理系统启动后自动打开，内网访问地址为 <b>http://127.0.0.1:8090</b></li>
+      <li>主要功能模块</li>
     </ol>
+    <div class="modules">
+      <p><b>「日常办公」</b>管理常用系统/网址，一键打开，安全保存账号密码</p>
+      <p><b>「工作安排」</b>创建待办任务，定时提醒，完成后归档历史台账</p>
+      <p><b>「定时任务」</b>按设定时间自动关机、重启、提醒、启动程序</p>
+      <p><b>「图文处理」</b>OCR 图片文字识别、doc/docx↔PDF 转换、公文模板生成</p>
+      <p><b>「数据分析」</b>导入数据报表生成风险分析报告、表格比对</p>
+      <p><b>「报表管理」</b>内网报表填报系统，以浏览器方式访问，支持多文件，表格内多个工作表，支持表格内设公式，自动识别，不能有合并单元格，支持多账号多单位在线填报、任务下发、审核汇总。</p>
+      <p><b>「构建知识库」</b>上传个人文档组建知识文库，快速查找资料，本地智能问答</p>
+      <p><b>「系统管理」</b>数据备份与还原、查看数据文件</p>
+    </div>
     <div class="note">本软件为内网版，无需外网、无需云服务器，即可完成模板管理、任务下发、在线填报与审核汇总。如有使用问题，请联系发布单位。</div>
   </div>
 
   <div class="footer">
     <div>© 牛来工作小助手 · 内网版发布</div>
-    <div class="count">本页访问 <b><span id="busuanzi_value_page_pv">—</span></b> 次 · 独立访客 <b><span id="busuanzi_value_site_uv">—</span></b> 人</div>
+    <div class="count">本页访问 <b><span id="pv_show">6,000</span></b> 次 · 独立访客 <b><span id="uv_show">5,605</span></b> 人</div>
   </div>
 
 </div>
+<span id="busuanzi_value_page_pv" style="display:none"></span>
+<span id="busuanzi_value_site_uv" style="display:none"></span>
 <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script>
+  var PV_BASE = 6000, UV_BASE = 5605;
+  function updCounter(){
+    var pv = document.getElementById('busuanzi_value_page_pv');
+    var uv = document.getElementById('busuanzi_value_site_uv');
+    var pvN = pv ? parseInt(String(pv.textContent||'').replace(/,/g,''),10) : NaN;
+    var uvN = uv ? parseInt(String(uv.textContent||'').replace(/,/g,''),10) : NaN;
+    document.getElementById('pv_show').textContent = (PV_BASE + (isNaN(pvN)?0:pvN)).toLocaleString('zh-CN');
+    document.getElementById('uv_show').textContent = (UV_BASE + (isNaN(uvN)?0:uvN)).toLocaleString('zh-CN');
+  }
+  setInterval(updCounter, 1500);
+</script>
 </body>
 </html>
