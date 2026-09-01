@@ -5,24 +5,103 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>班费收支明细表 - 牛来工作小助手</title>
 <style>
-body{font-family:'Microsoft YaHei',Arial,sans-serif;background:#eef2f9;margin:0;padding:20px;min-height:100vh;box-sizing:border-box;}
-.container{max-width:1100px;margin:0 auto;background:#fff;border-radius:12px;padding:30px;box-shadow:0 4px 20px rgba(0,0,0,.08);}
-h1{text-align:center;color:#1e2a5a;margin:0 0 8px;font-size:24px;}
-.subtitle{text-align:center;color:#6b7280;font-size:13px;margin-bottom:24px;}
-.img-wrap{text-align:center;overflow-x:auto;padding:10px 0;}
-.img-wrap img{max-width:100%;height:auto;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,.1);}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Microsoft YaHei','PingFang SC',Arial,sans-serif;background:#eef2f9;padding:20px;min-height:100vh;}
+.container{max-width:1200px;margin:0 auto;background:#fff;border-radius:12px;padding:30px;box-shadow:0 4px 20px rgba(0,0,0,.08);}
+h1{text-align:center;color:#1e2a5a;font-size:26px;margin-bottom:6px;letter-spacing:2px;}
+.meta-bar{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin:14px 0 20px;padding:12px 16px;background:#f5f7fb;border-radius:8px;font-size:14px;color:#374151;}
+.meta-bar span{white-space:nowrap;}
+.meta-bar b{color:#1e2a5a;}
+.table-wrap{overflow-x:auto;border-radius:8px;border:1px solid #e5e7eb;}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:900px;}
+thead th{background:#1e2a5a;color:#fff;padding:12px 10px;text-align:center;font-weight:600;white-space:nowrap;border-right:1px solid rgba(255,255,255,.15);}
+thead th:last-child{border-right:none;}
+tbody td{padding:11px 10px;text-align:center;border-bottom:1px solid #e5e7eb;border-right:1px solid #f0f0f0;vertical-align:middle;}
+tbody td:last-child{border-right:none;}
+tbody tr:nth-child(even){background:#f8fafc;}
+tbody tr:hover{background:#eef2ff;}
+.col-idx{width:50px;color:#6b7280;font-weight:600;}
+.col-date{width:110px;white-space:nowrap;}
+.col-type{width:70px;}
+.type-income{display:inline-block;padding:3px 10px;background:#dcfce7;color:#166534;border-radius:20px;font-size:12px;font-weight:600;}
+.type-expense{display:inline-block;padding:3px 10px;background:#fee2e2;color:#991b1b;border-radius:20px;font-size:12px;font-weight:600;}
+.col-project{text-align:left !important;padding-left:14px !important;line-height:1.5;}
+.amount-income{color:#16a34a;font-weight:700;font-variant-numeric:tabular-nums;}
+.amount-expense{color:#dc2626;font-weight:700;font-variant-numeric:tabular-nums;}
+.amount-empty{color:#d1d5db;}
+.col-balance{font-weight:700;color:#1e2a5a;font-variant-numeric:tabular-nums;background:#f0f4ff;}
+.col-operator{width:90px;white-space:nowrap;}
+.col-remark{text-align:left !important;padding-left:14px !important;color:#6b7280;font-size:13px;}
+.summary-row td{background:#f0f4ff !important;font-weight:700;color:#1e2a5a;padding:13px 10px;}
+.summary-row .label{text-align:right !important;padding-right:14px !important;}
 .back-link{text-align:center;margin-top:24px;}
-.back-link a{display:inline-block;padding:10px 28px;background:#1e2a5a;color:#fff;text-decoration:none;border-radius:8px;font-size:14px;transition:background .2s;}
+.back-link a{display:inline-block;padding:10px 32px;background:#1e2a5a;color:#fff;text-decoration:none;border-radius:8px;font-size:14px;transition:background .2s;}
 .back-link a:hover{background:#2b3a7a;}
-.footer{text-align:center;color:#9ca3af;font-size:12px;margin-top:20px;}
+.footer{text-align:center;color:#9ca3af;font-size:12px;margin-top:18px;}
+@media(max-width:640px){
+  body{padding:10px;}
+  .container{padding:16px;}
+  h1{font-size:20px;}
+  .meta-bar{font-size:12px;padding:10px;}
+  table{font-size:12px;min-width:800px;}
+}
 </style>
 </head>
 <body>
 <div class="container">
 <h1>班费收支明细表</h1>
-<div class="subtitle">一（10）班 · 上学期 · 制表日期：2026年9月1日</div>
-<div class="img-wrap">
-<img src="banfei.png" alt="班费收支明细表">
+<div class="meta-bar">
+<span>班级：<b>一（10）</b></span>
+<span>学期：<b>上学期</b></span>
+<span>制表日期：<b>2026年9月1日</b></span>
+</div>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th class="col-idx">序号</th>
+<th class="col-date">日期</th>
+<th class="col-type">收支类型</th>
+<th>收支项目</th>
+<th>收入金额(元)</th>
+<th>支出金额(元)</th>
+<th>余额(元)</th>
+<th class="col-operator">经办人</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="col-idx">1</td>
+<td class="col-date">2026年9月1日</td>
+<td class="col-type"><span class="type-income">收入</span></td>
+<td class="col-project">期初收缴班费（每人100元×45人）</td>
+<td class="amount-income">4,500.00</td>
+<td class="amount-empty">—</td>
+<td class="col-balance">4,500.00</td>
+<td class="col-operator">段砚科爸爸</td>
+<td class="col-remark">新学期收缴</td>
+</tr>
+<tr>
+<td class="col-idx">2</td>
+<td class="col-date">2026年9月1日</td>
+<td class="col-type"><span class="type-expense">支出</span></td>
+<td class="col-project">购买海绵拖把1×25元、扫把5×25元</td>
+<td class="amount-empty">—</td>
+<td class="amount-expense">150.00</td>
+<td class="col-balance">4,350.00</td>
+<td class="col-operator">吴周闻妈妈</td>
+<td class="col-remark">—</td>
+</tr>
+<tr class="summary-row">
+<td colspan="4" class="label">本期合计</td>
+<td class="amount-income">4,500.00</td>
+<td class="amount-expense">150.00</td>
+<td class="col-balance">4,350.00</td>
+<td colspan="2"></td>
+</tr>
+</tbody>
+</table>
 </div>
 <div class="back-link">
 <a href="./">返回下载页</a>
