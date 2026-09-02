@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-09-02T09:18:20.000Z",
+  "updated": "2026-09-02T01:30:56.030Z",
   "rows": [
     {
       "id": "base_0",
@@ -11,7 +11,16 @@
       "expense": 0,
       "operator": "段砚科爸爸",
       "remark": "新学期收缴",
-      "receipts": []
+      "receipts": [
+        {
+          "name": "微信图片_20260901163556_120_151.jpg",
+          "url": "https://flyfish2080.github.io/nl-download-page/receipts/r_1788312650599_5tj4.jpg"
+        },
+        {
+          "name": "微信图片_20260901163604_121_151.jpg",
+          "url": "https://flyfish2080.github.io/nl-download-page/receipts/r_1788312653925_61n4.jpg"
+        }
+      ]
     },
     {
       "id": "base_1",
