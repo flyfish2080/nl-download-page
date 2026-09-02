@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-09-02T01:46:59.275Z",
+  "updated": "2026-09-02T02:15:36.316Z",
   "rows": [
     {
       "id": "base_0",
@@ -15,10 +15,6 @@
         {
           "name": "微信图片_20260901163556_120_151.jpg",
           "url": "https://flyfish2080.github.io/nl-download-page/receipts/r_1788312650599_5tj4.jpg"
-        },
-        {
-          "name": "微信图片_20260901163604_121_151.jpg",
-          "url": "https://flyfish2080.github.io/nl-download-page/receipts/r_1788312653925_61n4.jpg"
         }
       ]
     },
