@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>班费收支明细表 - 牛来工作小助手</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Microsoft YaHei','PingFang SC',Arial,sans-serif;background:#eef2f9;padding:20px;min-height:100vh;}
@@ -12,15 +13,16 @@ h1{text-align:center;color:#1e2a5a;font-size:26px;margin-bottom:6px;letter-spaci
 .meta-bar{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin:14px 0 16px;padding:12px 16px;background:#f5f7fb;border-radius:8px;font-size:14px;color:#374151;}
 .meta-bar span{white-space:nowrap;}
 .meta-bar b{color:#1e2a5a;}
-.toolbar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.toolbar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;}
 .btn{display:inline-flex;align-items:center;gap:6px;padding:9px 20px;border:none;border-radius:8px;font-size:14px;cursor:pointer;transition:all .2s;font-family:inherit;}
 .btn-primary{background:#1e2a5a;color:#fff;}
 .btn-primary:hover{background:#2b3a7a;}
 .btn-success{background:#16a34a;color:#fff;}
 .btn-success:hover{background:#15803d;}
-.btn-warning{background:#d97706;color:#fff;}
-.btn-warning:hover{background:#b45309;}
+.btn-info{background:#2563eb;color:#fff;}
+.btn-info:hover{background:#1d4ed8;}
 .btn-sm{padding:6px 14px;font-size:13px;}
+.toolbar .divider{width:1px;height:24px;background:#e5e7eb;margin:0 4px;}
 .table-wrap{overflow-x:auto;border-radius:8px;border:1px solid #e5e7eb;}
 table{width:100%;border-collapse:collapse;font-size:14px;min-width:900px;}
 thead th{background:#1e2a5a;color:#fff;padding:12px 10px;text-align:center;font-weight:600;white-space:nowrap;border-right:1px solid rgba(255,255,255,.15);}
@@ -50,16 +52,15 @@ tbody tr:hover{background:#eef2ff;}
 .back-link a{display:inline-block;padding:10px 32px;background:#1e2a5a;color:#fff;text-decoration:none;border-radius:8px;font-size:14px;transition:background .2s;}
 .back-link a:hover{background:#2b3a7a;}
 .footer{text-align:center;color:#9ca3af;font-size:12px;margin-top:18px;}
-/* 导入弹窗 */
 .modal-mask{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;}
 .modal-mask.show{display:flex;}
-.modal{background:#fff;border-radius:12px;padding:28px;width:420px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,.2);}
+.modal{background:#fff;border-radius:12px;padding:28px;width:440px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,.2);}
 .modal h3{color:#1e2a5a;margin-bottom:18px;font-size:18px;}
 .modal .field{margin-bottom:16px;}
 .modal label{display:block;font-size:13px;color:#374151;margin-bottom:6px;font-weight:600;}
 .modal input[type=password],.modal input[type=file]{width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;box-sizing:border-box;font-family:inherit;}
 .modal input:focus{outline:2px solid #3b82f6;border-color:transparent;}
-.modal .hint{font-size:12px;color:#6b7280;margin-top:4px;}
+.modal .hint{font-size:12px;color:#6b7280;margin-top:4px;line-height:1.5;}
 .modal .err{color:#dc2626;font-size:13px;min-height:18px;margin-bottom:10px;}
 .modal .btns{display:flex;gap:10px;justify-content:flex-end;margin-top:8px;}
 .modal .btn-cancel{background:#e5e7eb;color:#374151;}
@@ -89,8 +90,8 @@ tbody tr:hover{background:#eef2ff;}
 </div>
 <div class="toolbar">
 <button class="btn btn-success" onclick="showImportModal()">📥 导入数据</button>
-<button class="btn btn-primary" onclick="exportData()">📤 导出数据</button>
-<button class="btn btn-warning btn-sm" onclick="clearImported()">🗑 清除导入数据</button>
+<button class="btn btn-primary" onclick="exportExcel()">📊 导出 Excel</button>
+<button class="btn btn-info" onclick="exportText()">📄 导出文本</button>
 </div>
 <div class="table-wrap">
 <table>
@@ -119,19 +120,18 @@ tbody tr:hover{background:#eef2ff;}
 </table>
 </div>
 <div class="back-link">
-<a href="./">返回主页</a>
+<a href="./">返回首页</a>
 </div>
 <div class="footer">牛来工作小助手 · 内网办公工具</div>
 </div>
 
-<!-- 导入弹窗 -->
 <div class="modal-mask" id="importModal">
 <div class="modal">
 <h3>📥 导入班费数据</h3>
 <div class="field">
 <label>选择数据文件</label>
-<input type="file" id="importFile" accept=".txt,.csv,.tsv">
-<div class="hint">支持制表符分隔的 txt/csv 文件，格式与导出一致</div>
+<input type="file" id="importFile" accept=".txt,.csv,.tsv,.xls,.xlsx">
+<div class="hint">支持 Excel（.xls/.xlsx）和制表符分隔文本（.txt/.csv/.tsv），格式与导出一致</div>
 </div>
 <div class="field">
 <label>导入密码</label>
@@ -148,7 +148,6 @@ tbody tr:hover{background:#eef2ff;}
 <div class="toast" id="toast"></div>
 
 <script>
-// 基础数据（页面初始数据）
 var baseData = [
   {date:'2026年9月1日',type:'收入',project:'期初收缴班费（每人100元×45人）',income:4500,expense:0,operator:'段砚科爸爸',remark:'新学期收缴'},
   {date:'2026年9月1日',type:'支出',project:'购买海绵拖把1×25元、扫把5×25元',income:0,expense:150,operator:'吴周闻妈妈',remark:''}
@@ -157,221 +156,240 @@ var IMPORT_PASSWORD = '9168';
 var STORAGE_KEY = 'banfei_imported_data';
 
 function getImported(){
-  try{
-    var d = localStorage.getItem(STORAGE_KEY);
-    return d ? JSON.parse(d) : [];
-  }catch(e){return [];}
+  try{var d=localStorage.getItem(STORAGE_KEY);return d?JSON.parse(d):[];}catch(e){return [];}
 }
-function saveImported(data){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-}
-function getAllData(){
-  return baseData.concat(getImported());
-}
-function fmt(n){
-  return Number(n).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});
-}
+function saveImported(data){localStorage.setItem(STORAGE_KEY,JSON.stringify(data));}
+function getAllData(){return baseData.concat(getImported());}
+function fmt(n){return Number(n).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function parseNum(s){
-  if(!s || s === '—' || s === '-' || s.trim() === '') return 0;
-  return parseFloat(String(s).replace(/,/g,'').trim()) || 0;
+  if(s===null||s===undefined) return 0;
+  var str=String(s).trim();
+  if(!str||str==='—'||str==='-') return 0;
+  return parseFloat(str.replace(/,/g,''))||0;
 }
 function render(){
-  var data = getAllData();
-  var tbody = document.getElementById('tableBody');
-  var balance = 0, sumIn = 0, sumOut = 0;
-  var html = '';
+  var data=getAllData();
+  var tbody=document.getElementById('tableBody');
+  var balance=0,sumIn=0,sumOut=0;
+  var html='';
   for(var i=0;i<data.length;i++){
-    var row = data[i];
-    balance = balance + row.income - row.expense;
-    sumIn += row.income;
-    sumOut += row.expense;
-    var isBase = i < baseData.length;
-    var typeCls = row.type === '收入' ? 'type-income' : 'type-expense';
-    html += '<tr>';
-    html += '<td class="col-idx">'+(i+1)+'</td>';
-    html += '<td class="col-date">'+(row.date||'')+'</td>';
-    html += '<td class="col-type"><span class="'+typeCls+'">'+(row.type||'')+'</span></td>';
-    html += '<td class="col-project">'+(row.project||'')+'</td>';
-    html += '<td class="'+(row.income>0?'amount-income':'amount-empty')+'">'+(row.income>0?fmt(row.income):'—')+'</td>';
-    html += '<td class="'+(row.expense>0?'amount-expense':'amount-empty')+'">'+(row.expense>0?fmt(row.expense):'—')+'</td>';
-    html += '<td class="col-balance">'+fmt(balance)+'</td>';
-    html += '<td class="col-operator">'+(row.operator||'')+'</td>';
-    html += '<td class="col-remark">'+(row.remark||'—')+'</td>';
-    html += '<td class="col-action">'+(isBase?'':'<button class="del-btn" onclick="delRow('+(i-baseData.length)+')" title="删除">✕</button>')+'</td>';
-    html += '</tr>';
+    var row=data[i];
+    balance=balance+row.income-row.expense;
+    sumIn+=row.income;sumOut+=row.expense;
+    var isBase=i<baseData.length;
+    var typeCls=row.type==='收入'?'type-income':'type-expense';
+    html+='<tr>';
+    html+='<td class="col-idx">'+(i+1)+'</td>';
+    html+='<td class="col-date">'+(row.date||'')+'</td>';
+    html+='<td class="col-type"><span class="'+typeCls+'">'+(row.type||'')+'</span></td>';
+    html+='<td class="col-project">'+(row.project||'')+'</td>';
+    html+='<td class="'+(row.income>0?'amount-income':'amount-empty')+'">'+(row.income>0?fmt(row.income):'—')+'</td>';
+    html+='<td class="'+(row.expense>0?'amount-expense':'amount-empty')+'">'+(row.expense>0?fmt(row.expense):'—')+'</td>';
+    html+='<td class="col-balance">'+fmt(balance)+'</td>';
+    html+='<td class="col-operator">'+(row.operator||'')+'</td>';
+    html+='<td class="col-remark">'+(row.remark||'—')+'</td>';
+    html+='<td class="col-action">'+(isBase?'':'<button class="del-btn" onclick="delRow('+(i-baseData.length)+')" title="删除">✕</button>')+'</td>';
+    html+='</tr>';
   }
-  tbody.innerHTML = html;
-  document.getElementById('sumIncome').textContent = fmt(sumIn);
-  document.getElementById('sumExpense').textContent = fmt(sumOut);
-  document.getElementById('sumBalance').textContent = fmt(balance);
+  tbody.innerHTML=html;
+  document.getElementById('sumIncome').textContent=fmt(sumIn);
+  document.getElementById('sumExpense').textContent=fmt(sumOut);
+  document.getElementById('sumBalance').textContent=fmt(balance);
 }
 function delRow(idx){
   if(!confirm('确定删除这条导入的数据吗？')) return;
-  var data = getImported();
+  var data=getImported();
   data.splice(idx,1);
   saveImported(data);
   render();
   showToast('已删除','success');
 }
-function clearImported(){
-  var data = getImported();
-  if(data.length === 0){showToast('没有导入数据','error');return;}
-  if(!confirm('确定清除全部 '+data.length+' 条导入数据吗？基础数据将保留。')) return;
-  localStorage.removeItem(STORAGE_KEY);
-  render();
-  showToast('已清除导入数据','success');
-}
 function showImportModal(){
   document.getElementById('importModal').classList.add('show');
-  document.getElementById('importErr').textContent = '';
-  document.getElementById('importFile').value = '';
-  document.getElementById('importPassword').value = '';
+  document.getElementById('importErr').textContent='';
+  document.getElementById('importFile').value='';
+  document.getElementById('importPassword').value='';
 }
-function hideImportModal(){
-  document.getElementById('importModal').classList.remove('show');
-}
+function hideImportModal(){document.getElementById('importModal').classList.remove('show');}
 function showToast(msg,type){
-  var t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast show ' + (type||'');
+  var t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className='toast show '+(type||'');
   setTimeout(function(){t.className='toast';},2500);
 }
 function doImport(){
-  var fileInput = document.getElementById('importFile');
-  var pwd = document.getElementById('importPassword').value;
-  var errEl = document.getElementById('importErr');
-  if(!fileInput.files || fileInput.files.length === 0){
-    errEl.textContent = '请先选择数据文件';return;
+  var fileInput=document.getElementById('importFile');
+  var pwd=document.getElementById('importPassword').value;
+  var errEl=document.getElementById('importErr');
+  if(!fileInput.files||fileInput.files.length===0){errEl.textContent='请先选择数据文件';return;}
+  if(pwd!==IMPORT_PASSWORD){errEl.textContent='导入密码错误';return;}
+  var file=fileInput.files[0];
+  var ext=file.name.split('.').pop().toLowerCase();
+  if(ext==='xls'||ext==='xlsx'){
+    importExcel(file,errEl);
+  }else{
+    importText(file,errEl);
   }
-  if(pwd !== IMPORT_PASSWORD){
-    errEl.textContent = '导入密码错误';return;
-  }
-  var file = fileInput.files[0];
-  var reader = new FileReader();
-  reader.onload = function(e){
+}
+function importExcel(file,errEl){
+  var reader=new FileReader();
+  reader.onload=function(e){
     try{
-      var text = e.target.result;
-      var rows = parseImportText(text);
-      if(rows.length === 0){
-        errEl.textContent = '未解析到有效数据行，请检查文件格式';return;
-      }
-      var existing = getImported();
-      var merged = existing.concat(rows);
-      saveImported(merged);
-      render();
-      hideImportModal();
-      showToast('成功导入 '+rows.length+' 条数据','success');
+      var data=new Uint8Array(e.target.result);
+      var wb=XLSX.read(data,{type:'array'});
+      var ws=wb.Sheets[wb.SheetNames[0]];
+      var rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+      var parsed=parseRows(rows);
+      if(parsed.length===0){errEl.textContent='未解析到有效数据行，请检查Excel格式';return;}
+      finishImport(parsed);
     }catch(err){
-      errEl.textContent = '解析失败：' + err.message;
+      errEl.textContent='Excel解析失败：'+err.message;
     }
   };
-  reader.onerror = function(){errEl.textContent = '文件读取失败';};
+  reader.onerror=function(){errEl.textContent='文件读取失败';};
+  reader.readAsArrayBuffer(file);
+}
+function importText(file,errEl){
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var text=e.target.result;
+      var lines=text.split(/\r?\n/);
+      var rows=[];
+      for(var i=0;i<lines.length;i++){
+        if(!lines[i].trim()) continue;
+        rows.push(lines[i].split('\t'));
+      }
+      var parsed=parseRows(rows);
+      if(parsed.length===0){errEl.textContent='未解析到有效数据行，请检查文件格式';return;}
+      finishImport(parsed);
+    }catch(err){
+      errEl.textContent='解析失败：'+err.message;
+    }
+  };
+  reader.onerror=function(){errEl.textContent='文件读取失败';};
   reader.readAsText(file,'UTF-8');
 }
-function parseImportText(text){
-  var lines = text.split(/\r?\n/);
-  var rows = [];
-  var dataStart = -1;
-  // 找表头行（包含"序号"和"收支类型"）
-  for(var i=0;i<lines.length;i++){
-    if(lines[i].indexOf('序号') >= 0 && lines[i].indexOf('收支类型') >= 0){
-      dataStart = i + 1;
-      break;
-    }
+function parseRows(rows){
+  var result=[];
+  var dataStart=-1;
+  // 找表头行
+  for(var i=0;i<rows.length;i++){
+    var line=rows[i].join('');
+    if(line.indexOf('序号')>=0&&line.indexOf('收支类型')>=0){dataStart=i+1;break;}
   }
-  if(dataStart < 0) dataStart = 0;
-  for(var j=dataStart;j<lines.length;j++){
-    var line = lines[j].trim();
-    if(!line) continue;
-    // 跳过合计行、标题行
-    if(line.indexOf('本期合计') >= 0) continue;
-    if(line.indexOf('班费收支明细表') >= 0) continue;
-    if(line.indexOf('返回主页') >= 0 || line.indexOf('返回下载页') >= 0) continue;
-    if(line.indexOf('牛来工作小助手') >= 0) continue;
-    if(line.indexOf('班级：') >= 0 || line.indexOf('学期：') >= 0 || line.indexOf('制表日期：') >= 0) continue;
-    var cols = line.split('\t');
-    if(cols.length < 5) continue;
-    // 列：序号,日期,收支类型,收支项目,收入金额,支出金额,余额,经办人,备注
-    // 序号可能不存在，按位置取
-    var date = '', type = '', project = '', income = 0, expense = 0, operator = '', remark = '';
-    // 尝试智能识别：找包含"收入"或"支出"的列作为类型列
-    var typeIdx = -1;
+  if(dataStart<0) dataStart=0;
+  for(var j=dataStart;j<rows.length;j++){
+    var cols=rows[j];
+    if(!cols||cols.length===0) continue;
+    var lineStr=cols.join('').trim();
+    if(!lineStr) continue;
+    if(lineStr.indexOf('本期合计')>=0) continue;
+    if(lineStr.indexOf('班费收支明细表')>=0) continue;
+    if(lineStr.indexOf('返回首页')>=0||lineStr.indexOf('返回主页')>=0||lineStr.indexOf('返回下载页')>=0) continue;
+    if(lineStr.indexOf('牛来工作小助手')>=0) continue;
+    if(lineStr.indexOf('班级：')>=0||lineStr.indexOf('学期：')>=0||lineStr.indexOf('制表日期')>=0) continue;
+    if(lineStr.indexOf('导入数据')>=0||lineStr.indexOf('导出数据')>=0||lineStr.indexOf('清除导入')>=0) continue;
+    // 找收支类型列
+    var typeIdx=-1;
     for(var c=0;c<cols.length;c++){
-      var cv = cols[c].trim();
-      if(cv === '收入' || cv === '支出'){typeIdx = c;break;}
+      var cv=String(cols[c]||'').trim();
+      if(cv==='收入'||cv==='支出'){typeIdx=c;break;}
     }
-    if(typeIdx >= 0){
-      type = cols[typeIdx].trim();
-      date = typeIdx > 0 ? cols[typeIdx-1].trim() : '';
-      project = typeIdx+1 < cols.length ? cols[typeIdx+1].trim() : '';
-      income = typeIdx+2 < cols.length ? parseNum(cols[typeIdx+2]) : 0;
-      expense = typeIdx+3 < cols.length ? parseNum(cols[typeIdx+3]) : 0;
-      operator = typeIdx+5 < cols.length ? cols[typeIdx+5].trim() : '';
-      remark = typeIdx+6 < cols.length ? cols[typeIdx+6].trim() : '';
+    var date='',type='',project='',income=0,expense=0,operator='',remark='';
+    if(typeIdx>=0){
+      type=String(cols[typeIdx]||'').trim();
+      date=typeIdx>0?String(cols[typeIdx-1]||'').trim():'';
+      project=typeIdx+1<cols.length?String(cols[typeIdx+1]||'').trim():'';
+      income=typeIdx+2<cols.length?parseNum(cols[typeIdx+2]):0;
+      expense=typeIdx+3<cols.length?parseNum(cols[typeIdx+3]):0;
+      operator=typeIdx+5<cols.length?String(cols[typeIdx+5]||'').trim():'';
+      remark=typeIdx+6<cols.length?String(cols[typeIdx+6]||'').trim():'';
     }else{
-      // 按固定位置
-      date = cols[1] ? cols[1].trim() : '';
-      type = cols[2] ? cols[2].trim() : '';
-      project = cols[3] ? cols[3].trim() : '';
-      income = cols[4] ? parseNum(cols[4]) : 0;
-      expense = cols[5] ? parseNum(cols[5]) : 0;
-      operator = cols[7] ? cols[7].trim() : '';
-      remark = cols[8] ? cols[8].trim() : '';
+      if(cols.length<5) continue;
+      date=cols[1]?String(cols[1]).trim():'';
+      type=cols[2]?String(cols[2]).trim():'';
+      project=cols[3]?String(cols[3]).trim():'';
+      income=cols[4]?parseNum(cols[4]):0;
+      expense=cols[5]?parseNum(cols[5]):0;
+      operator=cols[7]?String(cols[7]).trim():'';
+      remark=cols[8]?String(cols[8]).trim():'';
     }
-    if(!type && income === 0 && expense === 0) continue;
-    if(type !== '收入' && type !== '支出') continue;
-    rows.push({date:date,type:type,project:project,income:income,expense:expense,operator:operator,remark:(remark==='—'?'':remark)});
+    if(type!=='收入'&&type!=='支出') continue;
+    if(income===0&&expense===0) continue;
+    result.push({date:date,type:type,project:project,income:income,expense:expense,operator:operator,remark:(remark==='—'?'':remark)});
   }
-  return rows;
+  return result;
 }
-function exportData(){
-  var data = getAllData();
-  var balance = 0, sumIn = 0, sumOut = 0;
-  var lines = [];
-  lines.push('班费收支明细表');
-  lines.push('班级：一（10）');
-  lines.push('学期：上学期');
-  lines.push('制表日期：2026年9月1日');
-  lines.push('序号\t日期\t收支类型\t收支项目\t收入金额(元)\t支出金额(元)\t余额(元)\t经办人\t备注');
+function finishImport(rows){
+  var existing=getImported();
+  var merged=existing.concat(rows);
+  saveImported(merged);
+  render();
+  hideImportModal();
+  showToast('成功导入 '+rows.length+' 条数据','success');
+}
+function buildExportData(){
+  var data=getAllData();
+  var balance=0,sumIn=0,sumOut=0;
+  var aoa=[];
+  aoa.push(['班费收支明细表']);
+  aoa.push(['班级：一（10）','','学期：上学期']);
+  aoa.push(['制表日期：2026年9月1日']);
+  aoa.push([]);
+  aoa.push(['序号','日期','收支类型','收支项目','收入金额(元)','支出金额(元)','余额(元)','经办人','备注']);
   for(var i=0;i<data.length;i++){
-    var row = data[i];
-    balance = balance + row.income - row.expense;
-    sumIn += row.income;
-    sumOut += row.expense;
-    lines.push([
-      i+1,
-      row.date || '',
-      row.type || '',
-      row.project || '',
-      row.income > 0 ? fmt(row.income) : '—',
-      row.expense > 0 ? fmt(row.expense) : '—',
-      fmt(balance),
-      row.operator || '',
-      row.remark || '—'
-    ].join('\t'));
+    var row=data[i];
+    balance=balance+row.income-row.expense;
+    sumIn+=row.income;sumOut+=row.expense;
+    aoa.push([i+1,row.date||'',row.type||'',row.project||'',row.income>0?Number(row.income.toFixed(2)):'',row.expense>0?Number(row.expense.toFixed(2)):'',Number(balance.toFixed(2)),row.operator||'',row.remark||'']);
   }
-  lines.push('本期合计\t\t\t\t'+fmt(sumIn)+'\t'+fmt(sumOut)+'\t'+fmt(balance)+'\t\t');
-  lines.push('返回主页');
+  aoa.push(['本期合计','','','',Number(sumIn.toFixed(2)),Number(sumOut.toFixed(2)),Number(balance.toFixed(2)),'','']);
+  return {aoa:aoa,sumIn:sumIn,sumOut:sumOut,balance:balance};
+}
+function exportExcel(){
+  try{
+    var result=buildExportData();
+    var ws=XLSX.utils.aoa_to_sheet(result.aoa);
+    // 设置列宽
+    ws['!cols']=[{wch:6},{wch:14},{wch:8},{wch:40},{wch:14},{wch:14},{wch:14},{wch:12},{wch:20}];
+    // 合并标题行
+    ws['!merges']=[{s:{r:0,c:0},e:{r:0,c:8}}];
+    var wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,'班费收支明细');
+    var now=new Date();
+    var ts=now.getFullYear()+String(now.getMonth()+1).padStart(2,'0')+String(now.getDate()).padStart(2,'0')+'_'+String(now.getHours()).padStart(2,'0')+String(now.getMinutes()).padStart(2,'0');
+    XLSX.writeFile(wb,'班费收支明细表_'+ts+'.xlsx');
+    showToast('Excel已导出','success');
+  }catch(err){
+    showToast('导出失败：'+err.message,'error');
+  }
+}
+function exportText(){
+  var result=buildExportData();
+  var lines=[];
+  for(var i=0;i<result.aoa.length;i++){
+    lines.push(result.aoa[i].join('\t'));
+  }
+  lines.push('返回首页');
   lines.push('牛来工作小助手 · 内网办公工具');
-  var content = lines.join('\r\n');
-  var blob = new Blob(['\ufeff'+content],{type:'text/plain;charset=utf-8'});
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url;
-  var now = new Date();
-  var ts = now.getFullYear() + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0') + '_' + String(now.getHours()).padStart(2,'0') + String(now.getMinutes()).padStart(2,'0');
-  a.download = '班费收支明细表_'+ts+'.txt';
+  var content=lines.join('\r\n');
+  var blob=new Blob(['\ufeff'+content],{type:'text/plain;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;
+  var now=new Date();
+  var ts=now.getFullYear()+String(now.getMonth()+1).padStart(2,'0')+String(now.getDate()).padStart(2,'0')+'_'+String(now.getHours()).padStart(2,'0')+String(now.getMinutes()).padStart(2,'0');
+  a.download='班费收支明细表_'+ts+'.txt';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  showToast('数据已导出','success');
+  showToast('文本已导出','success');
 }
-// 点击遮罩关闭弹窗
 document.getElementById('importModal').addEventListener('click',function(e){
-  if(e.target === this) hideImportModal();
+  if(e.target===this) hideImportModal();
 });
-// 初始化
 render();
 </script>
 </body>
