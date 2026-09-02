@@ -259,10 +259,12 @@ function closePwdModal(){
 function confirmPwd(){
   var val=document.getElementById('pwdInput').value;
   if(val===ADMIN_PASSWORD){
+    var cb=pwdCallback;pwdCallback=null;
     closePwdModal();
-    if(pwdCallback){var cb=pwdCallback;pwdCallback=null;cb();}
+    if(cb) cb();
   }else{
-    document.getElementById('pwdErr').textContent='密码错误，请重新输入';
+    var errEl=document.getElementById('pwdErr');
+    if(errEl) errEl.textContent='密码错误，请重新输入';
     document.getElementById('pwdInput').value='';
     document.getElementById('pwdInput').focus();
   }
