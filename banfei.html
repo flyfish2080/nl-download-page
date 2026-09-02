@@ -937,30 +937,15 @@ function ghHeaders(){return {'Authorization':'token '+GH_TOKEN,'Accept':'applica
 
 
 async function ghGetFile(path){
-
-
-
   var url='https://api.github.com/repos/'+GH_OWNER+'/'+GH_REPO+'/contents/'+path+'?ref='+GH_BRANCH;
-
-
-
   var resp=await fetch(url,{headers:ghHeaders()});
-
-
-
   if(resp.status===404) return null;
-
-
-
   if(!resp.ok) throw new Error('GitHub API '+resp.status);
-
-
-
   var data=await resp.json();
-
-
-
-  return {sha:data.sha,content:b64ToUtf8(data.content.replace(/\s/g,''))};
+  var content='';
+  try{ content=b64ToUtf8(data.content.replace(/\s/g,'')); }catch(e){}
+  return {sha:data.sha,content:content};
+};
 
 
 
