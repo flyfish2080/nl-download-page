@@ -1,6 +1,13 @@
 {
-  "total": 3,
+  "total": 4,
   "logs": [
+    {
+      "time": "2026-09-02 14:42:55",
+      "ip": "未知",
+      "os": "Windows 10/11",
+      "browser": "Edge",
+      "page": "homeroom.html"
+    },
     {
       "time": "2026-09-02 14:42:23",
       "ip": "未知",
