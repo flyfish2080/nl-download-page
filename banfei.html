@@ -1,703 +1,1420 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
+
 <head>
+
 <meta charset="utf-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
 <title>班费收支明细表 - 牛来工作小助手</title>
+
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
 <style>
+
 *{margin:0;padding:0;box-sizing:border-box;}
+
 body{font-family:'Microsoft YaHei','PingFang SC',Arial,sans-serif;background:#eef2f9;padding:20px;min-height:100vh;}
+
 .container{max-width:1280px;margin:0 auto;background:#fff;border-radius:12px;padding:30px;box-shadow:0 4px 20px rgba(0,0,0,.08);}
+
 h1{text-align:center;color:#1e2a5a;font-size:26px;margin-bottom:6px;letter-spacing:2px;}
+
 .meta-bar{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin:14px 0 16px;padding:12px 16px;background:#f5f7fb;border-radius:8px;font-size:14px;color:#374151;}
+
 .meta-bar span{white-space:nowrap;}
+
 .meta-bar b{color:#1e2a5a;}
+
 .sync-status{font-size:12px;padding:3px 10px;border-radius:12px;background:#dcfce7;color:#166534;}
+
 .toolbar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;}
+
 .btn{display:inline-flex;align-items:center;gap:6px;padding:9px 20px;border:none;border-radius:8px;font-size:14px;cursor:pointer;transition:all .2s;font-family:inherit;}
+
 .btn-primary{background:#1e2a5a;color:#fff;}
+
 .btn-primary:hover{background:#2b3a7a;}
+
 .btn-success{background:#16a34a;color:#fff;}
+
 .btn-success:hover{background:#15803d;}
+
 .btn-info{background:#2563eb;color:#fff;}
+
 .btn-info:hover{background:#1d4ed8;}
+
 .btn-sm{padding:6px 14px;font-size:13px;}
+
 .table-wrap{overflow-x:auto;border-radius:8px;border:1px solid #e5e7eb;}
+
 table{width:100%;border-collapse:collapse;font-size:14px;min-width:1000px;}
+
 thead th{background:#1e2a5a;color:#fff;padding:12px 8px;text-align:center;font-weight:600;white-space:nowrap;border-right:1px solid rgba(255,255,255,.15);}
+
 thead th:last-child{border-right:none;}
+
 tbody td{padding:10px 8px;text-align:center;border-bottom:1px solid #e5e7eb;border-right:1px solid #f0f0f0;vertical-align:middle;}
+
 tbody td:last-child{border-right:none;}
+
 tbody tr:nth-child(even){background:#f8fafc;}
+
 tbody tr:hover{background:#eef2ff;}
+
 .col-idx{width:44px;color:#6b7280;font-weight:600;}
+
 .col-date{width:105px;white-space:nowrap;}
+
 .col-type{width:66px;}
+
 .type-income{display:inline-block;padding:3px 10px;background:#dcfce7;color:#166534;border-radius:20px;font-size:12px;font-weight:600;}
+
 .type-expense{display:inline-block;padding:3px 10px;background:#fee2e2;color:#991b1b;border-radius:20px;font-size:12px;font-weight:600;}
+
 .col-project{text-align:left !important;padding-left:12px !important;line-height:1.5;}
+
 .amount-income{color:#16a34a;font-weight:700;font-variant-numeric:tabular-nums;}
+
 .amount-expense{color:#dc2626;font-weight:700;font-variant-numeric:tabular-nums;}
+
 .amount-empty{color:#d1d5db;}
+
 .col-balance{font-weight:700;color:#1e2a5a;font-variant-numeric:tabular-nums;background:#f0f4ff;}
+
 .col-operator{width:85px;white-space:nowrap;}
+
 .col-remark{text-align:left !important;padding-left:12px !important;color:#6b7280;font-size:13px;}
+
 .col-action{width:50px;}
+
 .col-receipt{width:72px;}
+
 .del-btn{background:none;border:none;color:#dc2626;cursor:pointer;font-size:16px;padding:2px 6px;border-radius:4px;}
+
 .del-btn:hover{background:#fee2e2;}
+
 .receipt-btn{background:none;border:1px solid #d1d5db;color:#374151;cursor:pointer;padding:4px 10px;border-radius:6px;font-size:12px;transition:all .2s;font-family:inherit;white-space:nowrap;}
+
 .receipt-btn:hover{background:#eff6ff;border-color:#3b82f6;color:#1d4ed8;}
+
 .receipt-btn.has{background:#fef3c7;border-color:#f59e0b;color:#92400e;font-weight:600;}
+
 .receipt-btn.has:hover{background:#fde68a;}
+
 .summary-row td{background:#f0f4ff !important;font-weight:700;color:#1e2a5a;padding:13px 8px;}
+
 .summary-row .label{text-align:right !important;padding-right:14px !important;}
+
 .back-link{text-align:center;margin-top:24px;}
+
 .back-link a{display:inline-block;padding:10px 32px;background:#1e2a5a;color:#fff;text-decoration:none;border-radius:8px;font-size:14px;transition:background .2s;}
+
 .back-link a:hover{background:#2b3a7a;}
+
 .footer{text-align:center;color:#9ca3af;font-size:12px;margin-top:18px;}
+
 .modal-mask{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;}
+
 .modal-mask.show{display:flex;}
+
 .modal{background:#fff;border-radius:12px;padding:28px;width:400px;max-width:90vw;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);}
+
 .modal-wide{width:720px;}
+
 .modal h3{color:#1e2a5a;margin-bottom:18px;font-size:18px;}
+
 .modal .field{margin-bottom:16px;}
+
 .modal label{display:block;font-size:13px;color:#374151;margin-bottom:6px;font-weight:600;}
+
 .modal input[type=password],.modal input[type=file]{width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;box-sizing:border-box;font-family:inherit;}
+
 .modal input:focus{outline:2px solid #3b82f6;border-color:transparent;}
+
 .modal .hint{font-size:12px;color:#6b7280;margin-top:4px;line-height:1.5;}
+
 .modal .err{color:#dc2626;font-size:13px;min-height:18px;margin-bottom:10px;}
+
 .modal .btns{display:flex;gap:10px;justify-content:flex-end;margin-top:8px;}
+
 .modal .btn-cancel{background:#e5e7eb;color:#374151;}
+
 .modal .btn-cancel:hover{background:#d1d5db;}
+
 .receipt-upload-area{display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:12px;background:#f8fafc;border-radius:8px;flex-wrap:wrap;}
+
 .receipt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:16px;min-height:60px;}
+
 .receipt-grid .empty{grid-column:1/-1;text-align:center;color:#9ca3af;padding:30px 0;font-size:13px;}
+
 .receipt-item{position:relative;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;background:#f9fafb;}
+
 .receipt-item img{width:100%;height:120px;object-fit:cover;cursor:pointer;display:block;}
+
 .receipt-item .rname{font-size:11px;color:#6b7280;padding:4px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
 .receipt-item .rdel{position:absolute;top:4px;right:4px;background:rgba(220,38,38,.9);color:#fff;border:none;width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center;}
+
 .receipt-item .rdel:hover{background:#dc2626;}
+
 .lightbox{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:2000;align-items:center;justify-content:center;cursor:zoom-out;}
+
 .lightbox.show{display:flex;}
+
 .lightbox img{max-width:92vw;max-height:92vh;object-fit:contain;border-radius:8px;box-shadow:0 10px 40px rgba(0,0,0,.5);}
+
 .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1e2a5a;color:#fff;padding:12px 24px;border-radius:8px;font-size:14px;z-index:3000;opacity:0;transition:opacity .3s;pointer-events:none;}
+
 .toast.show{opacity:1;}
+
 .toast.success{background:#16a34a;}
+
 .toast.error{background:#dc2626;}
+
 .loading-mask{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,.7);z-index:4000;align-items:center;justify-content:center;}
+
 .loading-mask.show{display:flex;}
+
 .loading-box{background:#1e2a5a;color:#fff;padding:20px 36px;border-radius:12px;font-size:15px;box-shadow:0 10px 40px rgba(0,0,0,.3);}
+
 @media(max-width:640px){
+
   body{padding:10px;}
+
   .container{padding:16px;}
+
   h1{font-size:20px;}
+
   .meta-bar{font-size:12px;padding:10px;}
+
   table{font-size:12px;min-width:900px;}
+
   .toolbar{gap:8px;}
+
   .btn{padding:8px 14px;font-size:13px;}
+
   .modal-wide{width:95vw;}
+
   .receipt-grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));}
+
 }
+
 </style>
+
 </head>
+
 <body>
+
 <div class="container">
+
 <h1>班费收支明细表</h1>
+
 <div class="meta-bar">
+
 <span>班级：<b>一（10）</b></span>
+
 <span>学期：<b>上学期</b></span>
+
 <span>制表日期：<b>2026年9月1日</b></span>
+
 <span class="sync-status">● 在线数据（所有人可见）</span>
+
 </div>
+
 <div class="toolbar">
+
 <button class="btn btn-success" onclick="showImportModal()">📥 导入数据</button>
+
 <button class="btn btn-primary" onclick="exportExcel()">📊 导出 Excel</button>
+
 <button class="btn btn-info" onclick="exportText()">📄 导出文本</button>
+
 </div>
+
 <div class="table-wrap">
+
 <table>
+
 <thead>
+
 <tr>
+
 <th class="col-idx">序号</th>
+
 <th class="col-date">日期</th>
+
 <th class="col-type">收支类型</th>
+
 <th>收支项目</th>
+
 <th>收入金额(元)</th>
+
 <th>支出金额(元)</th>
+
 <th>余额(元)</th>
+
 <th class="col-operator">经办人</th>
+
 <th>备注</th>
+
 <th class="col-receipt">凭证</th>
+
 <th class="col-action">操作</th>
+
 </tr>
+
 </thead>
+
 <tbody id="tableBody"></tbody>
+
 <tr class="summary-row">
+
 <td colspan="4" class="label">本期合计</td>
+
 <td class="amount-income" id="sumIncome">0.00</td>
+
 <td class="amount-expense" id="sumExpense">0.00</td>
+
 <td class="col-balance" id="sumBalance">0.00</td>
+
 <td colspan="3"></td>
+
 </tr>
+
 </table>
+
 </div>
+
 <div class="back-link">
+
 <a href="./">返回首页</a>
+
 </div>
+
 <div class="footer">牛来工作小助手 · 内网办公工具 修改建议:178941631@qq.com</div>
+
 </div>
+
+
 
 <!-- 导入弹窗 -->
+
 <div class="modal-mask" id="importModal">
+
 <div class="modal">
+
 <h3>📥 导入班费数据</h3>
+
 <div class="field">
+
 <label>选择数据文件</label>
+
 <input type="file" id="importFile" accept=".txt,.csv,.tsv,.xls,.xlsx">
+
 <div class="hint">支持 Excel（.xls/.xlsx）和制表符分隔文本（.txt/.csv/.tsv）</div>
+
 </div>
+
 <div class="field">
+
 <label>管理密码</label>
+
 <input type="password" id="importPassword" placeholder="请输入管理密码">
+
 </div>
+
 <div class="err" id="importErr"></div>
+
 <div class="btns">
+
 <button class="btn btn-cancel" onclick="hideImportModal()">取消</button>
+
 <button class="btn btn-success" onclick="doImport()">确认导入</button>
+
 </div>
+
 </div>
+
 </div>
+
+
 
 <!-- 密码验证弹窗（通用） -->
+
 <div class="modal-mask" id="pwdModal">
+
 <div class="modal">
+
 <h3>🔐 请输入管理密码</h3>
+
 <div class="field">
+
 <label>管理密码</label>
+
 <input type="password" id="pwdInput" placeholder="请输入密码" onkeydown="if(event.key==='Enter')confirmPwd()">
+
 </div>
+
 <div class="err" id="pwdErr"></div>
+
 <div class="btns">
+
 <button class="btn btn-cancel" onclick="hidePwdModal()">取消</button>
+
 <button class="btn btn-success" onclick="confirmPwd()">确认</button>
+
 </div>
+
 </div>
+
 </div>
+
+
 
 <!-- 凭证管理弹窗 -->
+
 <div class="modal-mask" id="receiptModal">
+
 <div class="modal modal-wide">
+
 <h3>📎 凭证管理 — <span id="receiptRowInfo"></span></h3>
+
 <div class="receipt-upload-area">
+
 <input type="file" id="receiptFile" accept="image/*" multiple style="display:none">
+
 <button class="btn btn-success btn-sm" onclick="uploadReceiptClick()">📷 上传收据/截图</button>
+
 <span class="hint">图片在线存储，所有人可见。支持 JPG/PNG，自动压缩，可多选</span>
+
 </div>
+
 <div class="receipt-grid" id="receiptGrid"></div>
+
 <div class="btns">
+
 <button class="btn btn-cancel" onclick="closeReceiptModal()">关闭</button>
+
 </div>
+
 </div>
+
 </div>
+
+
 
 <!-- 大图查看 -->
+
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+
 <img id="lightboxImg" src="" alt="凭证大图">
+
 </div>
 
+
+
 <div class="toast" id="toast"></div>
+
 <div class="loading-mask" id="loadingMask"><div class="loading-box" id="loadingText">处理中...</div></div>
 
+
+
 <script>
+
 // ===== 配置（Token内置，密码即可操作） =====
+
 var GH_OWNER='flyfish2080', GH_REPO='nl-download-page', GH_BRANCH='main';
+
 var _a1="github_pat_11CE3",_b2="KG6Q0MRYhxvtJpBx",_c3="v_VM7atc0Kj8XD6o",_d4="hiPoc6yfveAs9EZD",_e5="roNNUj3RLsSDwAX5",_f6="74MP6xAM04fqV";
 var GH_TOKEN=_a1+_b2+_c3+_d4+_e5+_f6;
+
 var DATA_FILE='banfei_data.json';
+
 var PAGES_BASE='https://flyfish2080.github.io/nl-download-page/';
+
 var ADMIN_PASSWORD='9168';
 
+
+
 var baseData=[
+
   {id:'base_0',date:'2026年9月1日',type:'收入',project:'期初收缴班费（每人100元×45人）',income:4500,expense:0,operator:'段砚科爸爸',remark:'新学期收缴',receipts:[]},
+
   {id:'base_1',date:'2026年9月1日',type:'支出',project:'购买海绵拖把1×25元、扫把5×25元',income:0,expense:150,operator:'吴周闻妈妈',remark:'',receipts:[]}
+
 ];
 
+
+
 var allRows=[];
+
 var remoteSha=null;
+
 var pwdCallback=null; // 密码验证通过后的回调
 
+
+
 // ===== GitHub API =====
+
 function utf8ToB64(str){return btoa(unescape(encodeURIComponent(str)));}
+
 function b64ToUtf8(b64){return decodeURIComponent(escape(atob(b64)));}
+
 function ghHeaders(){return {'Authorization':'token '+GH_TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'};}
 
+
+
 async function ghGetFile(path){
+
   var url='https://api.github.com/repos/'+GH_OWNER+'/'+GH_REPO+'/contents/'+path+'?ref='+GH_BRANCH;
+
   var resp=await fetch(url,{headers:ghHeaders()});
+
   if(resp.status===404) return null;
+
   if(!resp.ok) throw new Error('GitHub API '+resp.status);
+
   var data=await resp.json();
+
   return {sha:data.sha,content:b64ToUtf8(data.content.replace(/\s/g,''))};
+
 }
+
 async function ghPutFile(path,content,message,sha){
+
   var url='https://api.github.com/repos/'+GH_OWNER+'/'+GH_REPO+'/contents/'+path;
+
   var body={message:message,content:utf8ToB64(content),branch:GH_BRANCH};
+
   if(sha) body.sha=sha;
+
   var resp=await fetch(url,{method:'PUT',headers:ghHeaders(),body:JSON.stringify(body)});
+
   if(!resp.ok){var e=await resp.json();throw new Error(e.message||'上传失败');}
+
   return await resp.json();
+
 }
+
 async function ghUploadImage(path,dataUrl,message){
+
   var url='https://api.github.com/repos/'+GH_OWNER+'/'+GH_REPO+'/contents/'+path;
+
   var pureB64=dataUrl.split(',')[1];
+
   var body={message:message,content:pureB64,branch:GH_BRANCH};
+
   var resp=await fetch(url,{method:'PUT',headers:ghHeaders(),body:JSON.stringify(body)});
+
   if(!resp.ok){var e=await resp.json();throw new Error(e.message||'图片上传失败');}
+
   return await resp.json();
+
 }
+
 async function ghDeleteFile(path,sha,message){
+
   var url='https://api.github.com/repos/'+GH_OWNER+'/'+GH_REPO+'/contents/'+path;
+
   var body={message:message,sha:sha,branch:GH_BRANCH};
+
   var resp=await fetch(url,{method:'DELETE',headers:ghHeaders(),body:JSON.stringify(body)});
+
   if(!resp.ok){var e=await resp.json();throw new Error(e.message||'删除失败');}
+
 }
+
+
 
 // ===== 密码验证 =====
+
 function isPwdVerified(){return sessionStorage.getItem('bf_pwd_ok')==='1';}
+
 function setPwdVerified(){sessionStorage.setItem('bf_pwd_ok','1');}
+
 function requirePassword(callback){
+
   if(isPwdVerified()){callback();return;}
+
   pwdCallback=callback;
+
   document.getElementById('pwdModal').classList.add('show');
+
   document.getElementById('pwdInput').value='';
+
   document.getElementById('pwdErr').textContent='';
+
   setTimeout(function(){document.getElementById('pwdInput').focus();},100);
+
 }
+
 function confirmPwd(){
+
   var val=document.getElementById('pwdInput').value;
+
   var errEl=document.getElementById('pwdErr');
+
   if(val!==ADMIN_PASSWORD){errEl.textContent='密码错误';return;}
+
   setPwdVerified();
+
   hidePwdModal();
+
   if(pwdCallback){var cb=pwdCallback;pwdCallback=null;cb();}
+
 }
+
 function hidePwdModal(){document.getElementById('pwdModal').classList.remove('show');}
 
+
+
 // ===== 数据加载/保存 =====
+
 async function loadData(){
+
   showLoading('加载在线数据...');
+
   try{
+
     var file=await ghGetFile(DATA_FILE);
+
     if(file){
+
       remoteSha=file.sha;
+
       var data=JSON.parse(file.content);
+
       allRows=data.rows||[];
+
       for(var i=0;i<allRows.length;i++){if(!allRows[i].receipts) allRows[i].receipts=[];}
+
       hideLoading();render();return;
+
     }
+
   }catch(e){console.warn('加载远程数据失败',e);}
+
   allRows=JSON.parse(JSON.stringify(baseData));
+
   remoteSha=null;
+
   hideLoading();
+
   render();
+
 }
+
 async function saveData(message){
+
   showLoading(message||'保存数据...');
+
   var payload={version:1,updated:new Date().toISOString(),rows:allRows};
+
   var content=JSON.stringify(payload,null,2);
+
   var result=await ghPutFile(DATA_FILE,content,'班费数据：'+(message||'更新'),remoteSha);
+
   remoteSha=result.content.sha;
+
   hideLoading();
+
 }
+
+
 
 // ===== 工具函数 =====
+
 function genId(){return 'imp_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);}
+
 function fmt(n){return Number(n).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});}
+
 function parseNum(s){
+
   if(s===null||s===undefined) return 0;
+
   var str=String(s).trim();
+
   if(!str||str==='—'||str==='-') return 0;
+
   return parseFloat(str.replace(/,/g,''))||0;
+
 }
+
 function showToast(msg,type){
+
   var t=document.getElementById('toast');
+
   t.textContent=msg;t.className='toast show '+(type||'');
+
   setTimeout(function(){t.className='toast';},2500);
+
 }
+
 function showLoading(text){document.getElementById('loadingText').textContent=text||'处理中...';document.getElementById('loadingMask').classList.add('show');}
+
 function hideLoading(){document.getElementById('loadingMask').classList.remove('show');}
 
+
+
 // ===== 渲染 =====
+
 function render(){
+
   var tbody=document.getElementById('tableBody');
+
   var balance=0,sumIn=0,sumOut=0;
+
   var html='';
+
   for(var i=0;i<allRows.length;i++){
+
     var row=allRows[i];
+
     balance=balance+row.income-row.expense;
+
     sumIn+=row.income;sumOut+=row.expense;
+
     var isBase=row.id&&row.id.indexOf('base_')===0;
+
     var typeCls=row.type==='收入'?'type-income':'type-expense';
+
     var recCount=(row.receipts||[]).length;
+
     var recCls=recCount>0?'receipt-btn has':'receipt-btn';
+
     var recText=recCount>0?'📎 '+recCount:'📎 上传';
+
     html+='<tr>';
+
     html+='<td class="col-idx">'+(i+1)+'</td>';
+
     html+='<td class="col-date">'+(row.date||'')+'</td>';
+
     html+='<td class="col-type"><span class="'+typeCls+'">'+(row.type||'')+'</span></td>';
+
     html+='<td class="col-project">'+(row.project||'')+'</td>';
+
     html+='<td class="'+(row.income>0?'amount-income':'amount-empty')+'">'+(row.income>0?fmt(row.income):'—')+'</td>';
+
     html+='<td class="'+(row.expense>0?'amount-expense':'amount-empty')+'">'+(row.expense>0?fmt(row.expense):'—')+'</td>';
+
     html+='<td class="col-balance">'+fmt(balance)+'</td>';
+
     html+='<td class="col-operator">'+(row.operator||'')+'</td>';
+
     html+='<td class="col-remark">'+(row.remark||'—')+'</td>';
+
     html+='<td class="col-receipt"><button class="'+recCls+'" onclick="openReceiptModal(\''+row.id+'\')">'+recText+'</button></td>';
+
     html+='<td class="col-action">'+(isBase?'':'<button class="del-btn" onclick="delRow(\''+row.id+'\')" title="删除">✕</button>')+'</td>';
+
     html+='</tr>';
+
   }
+
   tbody.innerHTML=html;
+
   document.getElementById('sumIncome').textContent=fmt(sumIn);
+
   document.getElementById('sumExpense').textContent=fmt(sumOut);
+
   document.getElementById('sumBalance').textContent=fmt(balance);
+
 }
+
+
 
 // ===== 删除行 =====
+
 function delRow(id){
+
   requirePassword(async function(){
+
     if(!confirm('确定删除这条数据吗？关联的凭证图片也会一并删除。')) return;
+
     var idx=allRows.findIndex(function(r){return r.id===id;});
+
     if(idx<0) return;
+
     var row=allRows[idx];
+
     try{
+
       for(var i=0;i<(row.receipts||[]).length;i++){
+
         var url=row.receipts[i].url;
-        var fname=url.replace(PAGES_BASE,'');
+
+        var fname=getReceiptPath(url);
+
         var f=await ghGetFile(fname);
+
         if(f) await ghDeleteFile(fname,f.sha,'删除凭证图片');
+
       }
+
     }catch(e){console.warn('删除图片失败',e);}
+
     allRows.splice(idx,1);
+
     try{
+
       await saveData('删除数据');
+
       render();
+
       showToast('已删除','success');
+
     }catch(e){
+
       allRows.splice(idx,0,row);
+
       render();
+
       showToast('删除失败：'+e.message,'error');
+
     }
+
   });
+
 }
+
+
 
 // ===== 导入 =====
+
 function showImportModal(){
+
   document.getElementById('importModal').classList.add('show');
+
   document.getElementById('importErr').textContent='';
+
   document.getElementById('importFile').value='';
+
   document.getElementById('importPassword').value='';
+
 }
+
 function hideImportModal(){document.getElementById('importModal').classList.remove('show');}
+
 function doImport(){
+
   var fileInput=document.getElementById('importFile');
+
   var pwd=document.getElementById('importPassword').value;
+
   var errEl=document.getElementById('importErr');
+
   if(!fileInput.files||fileInput.files.length===0){errEl.textContent='请先选择数据文件';return;}
+
   if(pwd!==ADMIN_PASSWORD){errEl.textContent='管理密码错误';return;}
+
   setPwdVerified();
+
   var file=fileInput.files[0];
+
   var ext=file.name.split('.').pop().toLowerCase();
+
   if(ext==='xls'||ext==='xlsx'){importExcel(file,errEl);}else{importText(file,errEl);}
+
 }
+
 function importExcel(file,errEl){
+
   var reader=new FileReader();
+
   reader.onload=function(e){
+
     try{
+
       var data=new Uint8Array(e.target.result);
+
       var wb=XLSX.read(data,{type:'array'});
+
       var ws=wb.Sheets[wb.SheetNames[0]];
+
       var rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+
       var parsed=parseRows(rows);
+
       if(parsed.length===0){errEl.textContent='未解析到有效数据行';return;}
+
       finishImport(parsed);
+
     }catch(err){errEl.textContent='Excel解析失败：'+err.message;}
+
   };
+
   reader.onerror=function(){errEl.textContent='文件读取失败';};
+
   reader.readAsArrayBuffer(file);
+
 }
+
 function importText(file,errEl){
+
   var reader=new FileReader();
+
   reader.onload=function(e){
+
     try{
+
       var text=e.target.result;
+
       var lines=text.split(/\r?\n/);
+
       var rows=[];
+
       for(var i=0;i<lines.length;i++){if(lines[i].trim()) rows.push(lines[i].split('\t'));}
+
       var parsed=parseRows(rows);
+
       if(parsed.length===0){errEl.textContent='未解析到有效数据行';return;}
+
       finishImport(parsed);
+
     }catch(err){errEl.textContent='解析失败：'+err.message;}
+
   };
+
   reader.onerror=function(){errEl.textContent='文件读取失败';};
+
   reader.readAsText(file,'UTF-8');
+
 }
+
 function parseRows(rows){
+
   var result=[];
+
   var dataStart=-1;
+
   for(var i=0;i<rows.length;i++){
+
     var line=rows[i].join('');
+
     if(line.indexOf('序号')>=0&&line.indexOf('收支类型')>=0){dataStart=i+1;break;}
+
   }
+
   if(dataStart<0) dataStart=0;
+
   for(var j=dataStart;j<rows.length;j++){
+
     var cols=rows[j];
+
     if(!cols||cols.length===0) continue;
+
     var lineStr=cols.join('').trim();
+
     if(!lineStr) continue;
+
     if(lineStr.indexOf('本期合计')>=0) continue;
+
     if(lineStr.indexOf('班费收支明细表')>=0) continue;
+
     if(lineStr.indexOf('返回')>=0&&lineStr.indexOf('页')>=0) continue;
+
     if(lineStr.indexOf('牛来工作小助手')>=0) continue;
+
     if(lineStr.indexOf('班级：')>=0||lineStr.indexOf('学期：')>=0||lineStr.indexOf('制表日期')>=0) continue;
+
     if(lineStr.indexOf('导入数据')>=0||lineStr.indexOf('导出数据')>=0) continue;
+
     if(lineStr.indexOf('凭证')>=0&&lineStr.indexOf('操作')>=0) continue;
+
     if(lineStr.indexOf('凭证数')>=0) continue;
+
     var typeIdx=-1;
+
     for(var c=0;c<cols.length;c++){
+
       var cv=String(cols[c]||'').trim();
+
       if(cv==='收入'||cv==='支出'){typeIdx=c;break;}
+
     }
+
     var date='',type='',project='',income=0,expense=0,operator='',remark='';
+
     if(typeIdx>=0){
+
       type=String(cols[typeIdx]||'').trim();
+
       date=typeIdx>0?String(cols[typeIdx-1]||'').trim():'';
+
       project=typeIdx+1<cols.length?String(cols[typeIdx+1]||'').trim():'';
+
       income=typeIdx+2<cols.length?parseNum(cols[typeIdx+2]):0;
+
       expense=typeIdx+3<cols.length?parseNum(cols[typeIdx+3]):0;
+
       operator=typeIdx+5<cols.length?String(cols[typeIdx+5]||'').trim():'';
+
       remark=typeIdx+6<cols.length?String(cols[typeIdx+6]||'').trim():'';
+
     }else{
+
       if(cols.length<5) continue;
+
       date=cols[1]?String(cols[1]).trim():'';
+
       type=cols[2]?String(cols[2]).trim():'';
+
       project=cols[3]?String(cols[3]).trim():'';
+
       income=cols[4]?parseNum(cols[4]):0;
+
       expense=cols[5]?parseNum(cols[5]):0;
+
       operator=cols[7]?String(cols[7]).trim():'';
+
       remark=cols[8]?String(cols[8]).trim():'';
+
     }
+
     if(type!=='收入'&&type!=='支出') continue;
+
     if(income===0&&expense===0) continue;
+
     result.push({id:genId(),date:date,type:type,project:project,income:income,expense:expense,operator:operator,remark:(remark==='—'?'':remark),receipts:[]});
+
   }
+
   return result;
+
 }
+
 async function finishImport(rows){
+
   var oldRows=JSON.parse(JSON.stringify(allRows));
+
   allRows=allRows.concat(rows);
+
   try{
+
     await saveData('导入'+rows.length+'条数据');
+
     render();
+
     hideImportModal();
+
     showToast('成功导入 '+rows.length+' 条数据','success');
+
   }catch(e){
+
     allRows=oldRows;
+
     render();
+
     document.getElementById('importErr').textContent='保存失败：'+e.message;
+
   }
+
 }
+
+
 
 // ===== 导出 =====
+
 function buildExportData(){
+
   var balance=0,sumIn=0,sumOut=0;
+
   var aoa=[];
+
   aoa.push(['班费收支明细表']);
+
   aoa.push(['班级：一（10）','','学期：上学期']);
+
   aoa.push(['制表日期：2026年9月1日']);
+
   aoa.push([]);
+
   aoa.push(['序号','日期','收支类型','收支项目','收入金额(元)','支出金额(元)','余额(元)','经办人','备注','凭证数']);
+
   for(var i=0;i<allRows.length;i++){
+
     var row=allRows[i];
+
     balance=balance+row.income-row.expense;
+
     sumIn+=row.income;sumOut+=row.expense;
+
     var recCount=(row.receipts||[]).length;
+
     aoa.push([i+1,row.date||'',row.type||'',row.project||'',row.income>0?Number(row.income.toFixed(2)):'',row.expense>0?Number(row.expense.toFixed(2)):'',Number(balance.toFixed(2)),row.operator||'',row.remark||'',recCount>0?recCount+'张':'']);
+
   }
+
   aoa.push(['本期合计','','','',Number(sumIn.toFixed(2)),Number(sumOut.toFixed(2)),Number(balance.toFixed(2)),'','','']);
+
   return {aoa:aoa};
+
 }
+
 function exportExcel(){
+
   try{
+
     var result=buildExportData();
+
     var ws=XLSX.utils.aoa_to_sheet(result.aoa);
+
     ws['!cols']=[{wch:6},{wch:14},{wch:8},{wch:40},{wch:14},{wch:14},{wch:14},{wch:12},{wch:20},{wch:8}];
+
     ws['!merges']=[{s:{r:0,c:0},e:{r:0,c:9}}];
+
     var wb=XLSX.utils.book_new();
+
     XLSX.utils.book_append_sheet(wb,ws,'班费收支明细');
+
     var now=new Date();
+
     var ts=now.getFullYear()+String(now.getMonth()+1).padStart(2,'0')+String(now.getDate()).padStart(2,'0')+'_'+String(now.getHours()).padStart(2,'0')+String(now.getMinutes()).padStart(2,'0');
+
     XLSX.writeFile(wb,'班费收支明细表_'+ts+'.xlsx');
+
     showToast('Excel已导出','success');
+
   }catch(err){showToast('导出失败：'+err.message,'error');}
+
 }
+
 function exportText(){
+
   var result=buildExportData();
+
   var lines=[];
+
   for(var i=0;i<result.aoa.length;i++){lines.push(result.aoa[i].join('\t'));}
+
   lines.push('返回首页');
+
   lines.push('牛来工作小助手 · 内网办公工具 修改建议:178941631@qq.com');
+
   var content=lines.join('\r\n');
+
   var blob=new Blob(['\ufeff'+content],{type:'text/plain;charset=utf-8'});
+
   var url=URL.createObjectURL(blob);
+
   var a=document.createElement('a');
+
   a.href=url;
+
   var now=new Date();
+
   var ts=now.getFullYear()+String(now.getMonth()+1).padStart(2,'0')+String(now.getDate()).padStart(2,'0')+'_'+String(now.getHours()).padStart(2,'0')+String(now.getMinutes()).padStart(2,'0');
+
   a.download='班费收支明细表_'+ts+'.txt';
+
   document.body.appendChild(a);a.click();document.body.removeChild(a);
+
   URL.revokeObjectURL(url);
+
   showToast('文本已导出','success');
+
 }
+
+
 
 // ===== 凭证管理 =====
+
 var currentReceiptId=null;
+
 function openReceiptModal(id){
+
   currentReceiptId=id;
+
   var row=allRows.find(function(r){return r.id===id;});
+
   var info=row?(row.date||'')+' '+(row.project||'').substring(0,20):'';
+
   document.getElementById('receiptRowInfo').textContent=info;
+
   document.getElementById('receiptModal').classList.add('show');
+
   document.getElementById('receiptFile').value='';
+
   renderReceiptGrid();
+
 }
+
 function closeReceiptModal(){
+
   document.getElementById('receiptModal').classList.remove('show');
+
   currentReceiptId=null;
+
 }
+
 function renderReceiptGrid(){
+
   if(!currentReceiptId) return;
+
   var row=allRows.find(function(r){return r.id===currentReceiptId;});
+
   var recs=row?row.receipts||[]:[];
+
   var grid=document.getElementById('receiptGrid');
+
   if(recs.length===0){
+
     grid.innerHTML='<div class="empty">暂无凭证图片，点击上方按钮上传</div>';
+
     return;
+
   }
+
   var html='';
+
   for(var i=0;i<recs.length;i++){
+
     var r=recs[i];
+
     html+='<div class="receipt-item">';
+
     html+='<img src="'+r.url+'" alt="'+r.name+'" onclick="showLightbox(\''+r.url+'\')">';
+
     html+='<div class="rname" title="'+r.name+'">'+r.name+'</div>';
+
     html+='<button class="rdel" onclick="deleteReceipt('+i+')" title="删除">✕</button>';
+
     html+='</div>';
+
   }
+
   grid.innerHTML=html;
+
 }
+
+
+// 从图片URL中健壮地提取仓库内文件路径
+function getReceiptPath(url){
+  if(!url) return '';
+  var p=getReceiptPath(url);
+  if(p!==url && p.indexOf('http')!==0) return p;
+  var idx=url.indexOf('receipts/');
+  if(idx>=0) return url.substring(idx);
+  try{
+    var u=new URL(url);
+    var ridx=u.pathname.indexOf('/receipts/');
+    if(ridx>=0) return u.pathname.substring(ridx+1);
+  }catch(e){}
+  return url;
+}
+
 function showLightbox(url){
+
   document.getElementById('lightboxImg').src=url;
+
   document.getElementById('lightbox').classList.add('show');
+
 }
+
 function closeLightbox(){document.getElementById('lightbox').classList.remove('show');}
 
+
+
 function uploadReceiptClick(){
+
   requirePassword(function(){
+
     document.getElementById('receiptFile').click();
+
   });
+
 }
+
+
 
 async function deleteReceipt(idx){
+
   if(!currentReceiptId) return;
+
   if(!confirm('确定删除这张凭证图片吗？')) return;
+
   var row=allRows.find(function(r){return r.id===currentReceiptId;});
+
   if(!row) return;
+
   var rec=row.receipts[idx];
+
   if(!rec) return;
+
   var oldReceipts=JSON.parse(JSON.stringify(row.receipts));
+
   try{
-    var fname=rec.url.replace(PAGES_BASE,'');
+
+    var fname=getReceiptPath(rec.url);
+
     var f=await ghGetFile(fname);
+
     if(f) await ghDeleteFile(fname,f.sha,'删除凭证图片');
+
     row.receipts.splice(idx,1);
+
     await saveData('删除凭证图片');
+
     renderReceiptGrid();
+
     render();
+
     showToast('已删除凭证','success');
+
   }catch(e){
+
     row.receipts=oldReceipts;
+
     renderReceiptGrid();
+
     showToast('删除失败：'+e.message,'error');
+
   }
+
 }
+
+
 
 // 图片压缩
+
 function compressImage(file,maxW,quality){
+
   return new Promise(function(res,rej){
+
     var reader=new FileReader();
+
     reader.onload=function(e){
+
       var img=new Image();
+
       img.onload=function(){
+
         var canvas=document.createElement('canvas');
+
         var w=img.width,h=img.height;
+
         if(w>maxW){h=h*maxW/w;w=maxW;}
+
         canvas.width=w;canvas.height=h;
+
         canvas.getContext('2d').drawImage(img,0,0,w,h);
+
         res(canvas.toDataURL('image/jpeg',quality));
+
       };
+
       img.onerror=rej;
+
       img.src=e.target.result;
+
     };
+
     reader.onerror=rej;
+
     reader.readAsDataURL(file);
+
   });
+
 }
 
+
+
 // 上传凭证
+
 document.getElementById('receiptFile').addEventListener('change',async function(e){
+
   if(!currentReceiptId) return;
+
   var files=e.target.files;
+
   if(!files||files.length===0) return;
+
   var row=allRows.find(function(r){return r.id===currentReceiptId;});
+
   if(!row) return;
+
   var oldReceipts=JSON.parse(JSON.stringify(row.receipts||[]));
+
   var uploaded=[];
+
   showLoading('正在上传 '+files.length+' 张图片...');
+
   try{
+
     for(var i=0;i<files.length;i++){
+
       var f=files[i];
+
       if(!f.type.startsWith('image/')) continue;
+
       var compressed=await compressImage(f,1280,0.82);
+
       var imgId='r_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+
       var path='receipts/'+imgId+'.jpg';
+
       await ghUploadImage(path,compressed,'上传凭证图片');
+
       var url=PAGES_BASE+path;
+
       uploaded.push({name:f.name.substring(0,40),url:url});
+
     }
+
     if(uploaded.length===0) throw new Error('没有有效图片');
+
     if(!row.receipts) row.receipts=[];
+
     row.receipts=row.receipts.concat(uploaded);
+
     await saveData('上传'+uploaded.length+'张凭证');
+
     hideLoading();
+
     renderReceiptGrid();
+
     render();
+
     showToast('成功上传 '+uploaded.length+' 张凭证','success');
+
   }catch(err){
+
     row.receipts=oldReceipts;
+
     hideLoading();
+
     renderReceiptGrid();
+
     showToast('上传失败：'+err.message,'error');
+
   }
+
   e.target.value='';
+
 });
 
+
+
 // 点击遮罩关闭
+
 document.getElementById('importModal').addEventListener('click',function(e){if(e.target===this) hideImportModal();});
+
 document.getElementById('pwdModal').addEventListener('click',function(e){if(e.target===this) hidePwdModal();});
+
 document.getElementById('receiptModal').addEventListener('click',function(e){if(e.target===this) closeReceiptModal();});
 
+
+
 // 初始化
+
 loadData();
+
 </script>
+
 </body>
+
 </html>
