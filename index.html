@@ -58,6 +58,43 @@
   .footer .count { display:inline-block; margin-top:8px; background:#fff; border:1px solid #e2e6f0;
     border-radius:20px; padding:6px 16px; font-size:13px; color:#1e2a5a; }
   .footer .count b { color:#2563eb; }
+
+.modal-mask{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;}
+.modal-mask.show{display:flex;}
+.modal{background:#fff;border-radius:12px;padding:28px;width:480px;max-width:90vw;max-height:85vh;overflow-y:auto;}
+.modal.wide{width:720px;}
+.modal h3{font-size:18px;color:#1e3a8a;margin-bottom:18px;}
+.modal .close-btn{float:right;cursor:pointer;color:#94a3b8;font-size:20px;line-height:1;}
+.modal .close-btn:hover{color:#333;}
+.pwd-field{margin:16px 0;}
+.pwd-field label{display:block;font-size:14px;color:#475569;margin-bottom:8px;}
+.pwd-field input{width:100%;padding:10px 14px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;}
+.pwd-field input:focus{outline:none;border-color:#1e3a8a;}
+.pwd-err{color:#ef4444;font-size:12px;margin-top:6px;min-height:16px;}
+.modal-btns{display:flex;gap:10px;margin-top:18px;justify-content:flex-end;}
+.btn{padding:9px 22px;border:none;border-radius:8px;font-size:14px;cursor:pointer;transition:background .2s;}
+.btn-primary{background:#1e3a8a;color:#fff;}
+.btn-primary:hover{background:#2b3a7a;}
+.btn-cancel{background:#e2e8f0;color:#475569;}
+.btn-cancel:hover{background:#cbd5e1;}
+.access-summary{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+.access-summary .item{background:#f8fafc;border-radius:8px;padding:14px;text-align:center;}
+.access-summary .item .n{font-size:22px;font-weight:700;color:#1e3a8a;}
+.access-summary .item .l{font-size:12px;color:#64748b;margin-top:4px;}
+.access-log{max-height:320px;overflow-y:auto;border:1px solid #e2e8f0;border-radius:8px;}
+.access-log table{width:100%;border-collapse:collapse;font-size:12px;}
+.access-log th{background:#1e3a8a;color:#fff;padding:8px 10px;text-align:left;position:sticky;top:0;}
+.access-log td{padding:7px 10px;border-bottom:1px solid #f1f5f9;}
+.access-log tr:nth-child(even){background:#f8fafc;}
+.access-log .ip{font-family:monospace;color:#475569;}
+.access-dist{margin-top:14px;}
+.access-dist h4{font-size:14px;color:#1e3a8a;margin-bottom:8px;}
+.dist-bar{display:flex;align-items:center;margin-bottom:6px;font-size:12px;}
+.dist-bar .name{width:100px;color:#475569;}
+.dist-bar .bar{flex:1;height:18px;background:#e2e8f0;border-radius:4px;overflow:hidden;margin:0 8px;}
+.dist-bar .bar-fill{height:100%;background:linear-gradient(90deg,#1e3a8a,#3b82f6);border-radius:4px;}
+.dist-bar .count{width:40px;text-align:right;color:#64748b;}
+
 </style>
 </head>
 <body>
@@ -106,6 +143,7 @@
   <div class="footer">
     <div>牛来工作小助手 · 内网办公工具</div>
     <div class="count">本页访问 <b><span id="pv_show">6,000</span></b> 次 · 独立访客 <b><span id="uv_show">5,605</span></b> 人</div>
+    <div style="margin-top:10px;"><a href="javascript:void(0)" onclick="openAccessStats()" style="color:#2563eb;text-decoration:none;font-size:13px;">📊 访问统计（需密码）</a></div>
   </div>
 
 </div>
@@ -202,7 +240,134 @@ async function recordAccess(){
   }catch(e){console.warn('记录访问失败:',e.message);}
 }
 recordAccess();
+
+// ===== 访问统计展示 =====
+var ADMIN_PASSWORD='9168';
+var pwdCallback=null;
+
+function openPwdModal(callback){
+  pwdCallback=callback;
+  document.getElementById('pwdInput').value='';
+  document.getElementById('pwdErr').textContent='';
+  document.getElementById('pwdModal').classList.add('show');
+  setTimeout(function(){document.getElementById('pwdInput').focus();},100);
+}
+function closePwdModal(){
+  document.getElementById('pwdModal').classList.remove('show');
+  pwdCallback=null;
+}
+function confirmPwd(){
+  var val=document.getElementById('pwdInput').value;
+  if(val===ADMIN_PASSWORD){
+    closePwdModal();
+    if(pwdCallback){var cb=pwdCallback;pwdCallback=null;cb();}
+  }else{
+    document.getElementById('pwdErr').textContent='密码错误，请重新输入';
+    document.getElementById('pwdInput').value='';
+    document.getElementById('pwdInput').focus();
+  }
+}
+document.getElementById('pwdModal').addEventListener('click',function(e){if(e.target===this) closePwdModal();});
+
+function openAccessStats(){
+  openPwdModal(function(){showAccessStats();});
+}
+
+async function showAccessStats(){
+  document.getElementById('accessModal').classList.add('show');
+  document.getElementById('accessSummary').innerHTML='<div style="text-align:center;padding:20px;color:#64748b;">加载中...</div>';
+  document.getElementById('accessLogBody').innerHTML='';
+  document.getElementById('accessDist').innerHTML='';
+  try{
+    var file=await ghGetFile(ACCESS_LOG_FILE);
+    if(!file || !file.content){
+      document.getElementById('accessSummary').innerHTML='<div style="text-align:center;padding:20px;color:#64748b;">暂无访问记录</div>';
+      return;
+    }
+    var data=JSON.parse(file.content);
+    var logs=data.logs||[];
+    var total=data.total||0;
+    var today=new Date().toISOString().slice(0,10);
+    var todayCount=logs.filter(function(l){return l.time&&l.time.slice(0,10)===today;}).length;
+    var uniqueIPs={};
+    logs.forEach(function(l){if(l.ip&&l.ip!=='未知')uniqueIPs[l.ip]=1;});
+    var lastTime=logs.length>0?logs[0].time:'无';
+    document.getElementById('accessSummary').innerHTML=
+      '<div class="item"><div class="n">'+total+'</div><div class="l">总访问次数</div></div>'+
+      '<div class="item"><div class="n">'+todayCount+'</div><div class="l">今日访问</div></div>'+
+      '<div class="item"><div class="n">'+Object.keys(uniqueIPs).length+'</div><div class="l">独立IP数</div></div>'+
+      '<div class="item"><div class="n" style="font-size:14px;padding-top:4px;">'+lastTime+'</div><div class="l">最近访问时间</div></div>';
+    var browserCount={},osCount={};
+    logs.forEach(function(l){
+      if(l.browser)browserCount[l.browser]=(browserCount[l.browser]||0)+1;
+      if(l.os)osCount[l.os]=(osCount[l.os]||0)+1;
+    });
+    var distHtml='<div class="access-dist"><h4>🌐 浏览器分布</h4>';
+    var browsers=Object.keys(browserCount).sort(function(a,b){return browserCount[b]-browserCount[a];});
+    var maxBrowser=browsers.length>0?browserCount[browsers[0]]:1;
+    browsers.forEach(function(b){
+      var pct=Math.round(browserCount[b]/maxBrowser*100);
+      distHtml+='<div class="dist-bar"><span class="name">'+b+'</span><div class="bar"><div class="bar-fill" style="width:'+pct+'%"></div></div><span class="count">'+browserCount[b]+'</span></div>';
+    });
+    distHtml+='</div>';
+    distHtml+='<div class="access-dist"><h4>💻 操作系统分布</h4>';
+    var oses=Object.keys(osCount).sort(function(a,b){return osCount[b]-osCount[a];});
+    var maxOS=oses.length>0?osCount[oses[0]]:1;
+    oses.forEach(function(o){
+      var pct=Math.round(osCount[o]/maxOS*100);
+      distHtml+='<div class="dist-bar"><span class="name">'+o+'</span><div class="bar"><div class="bar-fill" style="width:'+pct+'%"></div></div><span class="count">'+osCount[o]+'</span></div>';
+    });
+    distHtml+='</div>';
+    document.getElementById('accessDist').innerHTML=distHtml;
+    var showLogs=logs.slice(0,50);
+    var tbody='';
+    showLogs.forEach(function(l,i){
+      tbody+='<tr><td>'+(i+1)+'</td><td>'+(l.time||'-')+'</td><td class="ip">'+(l.ip||'-')+'</td><td>'+(l.os||'-')+'</td><td>'+(l.browser||'-')+'</td><td>'+(l.page||'-')+'</td></tr>';
+    });
+    document.getElementById('accessLogBody').innerHTML=tbody;
+  }catch(e){
+    document.getElementById('accessSummary').innerHTML='<div style="text-align:center;padding:20px;color:#ef4444;">加载失败: '+e.message+'</div>';
+  }
+}
+function closeAccessModal(){document.getElementById('accessModal').classList.remove('show');}
+document.getElementById('accessModal').addEventListener('click',function(e){if(e.target===this) closeAccessModal();});
+
 </script>
+
+
+<!-- 密码验证弹窗 -->
+<div class="modal-mask" id="pwdModal">
+  <div class="modal">
+    <span class="close-btn" onclick="closePwdModal()">✕</span>
+    <h3>🔐 请输入管理密码</h3>
+    <div class="pwd-field">
+      <label>管理密码</label>
+      <input type="password" id="pwdInput" placeholder="请输入密码" onkeydown="if(event.key==='Enter')confirmPwd()">
+    </div>
+    <div class="pwd-err" id="pwdErr"></div>
+    <div class="modal-btns">
+      <button class="btn btn-cancel" onclick="closePwdModal()">取消</button>
+      <button class="btn btn-primary" onclick="confirmPwd()">确定</button>
+    </div>
+  </div>
+</div>
+
+<!-- 访问统计弹窗 -->
+<div class="modal-mask" id="accessModal">
+  <div class="modal wide">
+    <span class="close-btn" onclick="closeAccessModal()">✕</span>
+    <h3>📊 页面访问统计</h3>
+    <div class="access-summary" id="accessSummary"></div>
+    <div class="access-dist" id="accessDist"></div>
+    <h4 style="font-size:14px;color:#1e3a8a;margin:16px 0 8px;">📋 访问日志（最近50条）</h4>
+    <div class="access-log" id="accessLog">
+      <table>
+        <thead><tr><th>序号</th><th>访问时间</th><th>IP地址</th><th>操作系统</th><th>浏览器</th><th>访问页面</th></tr></thead>
+        <tbody id="accessLogBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
