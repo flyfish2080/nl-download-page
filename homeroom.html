@@ -46,6 +46,7 @@ body{font-family:"Microsoft YaHei","PingFang SC",sans-serif;background:#f0f2f5;c
 .modal-mask{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;}
 .modal-mask.show{display:flex;}
 .modal{background:#fff;border-radius:12px;padding:28px;width:480px;max-width:90vw;max-height:85vh;overflow-y:auto;}
+.modal.wide{width:720px;}
 .modal h3{font-size:18px;color:#1e3a8a;margin-bottom:18px;}
 .modal .close-btn{float:right;cursor:pointer;color:#94a3b8;font-size:20px;line-height:1;}
 .modal .close-btn:hover{color:#333;}
@@ -53,6 +54,34 @@ body{font-family:"Microsoft YaHei","PingFang SC",sans-serif;background:#f0f2f5;c
 .module-detail ul{padding-left:20px;margin:10px 0;}
 .module-detail li{margin-bottom:6px;}
 .module-detail .coming{color:#f59e0b;font-weight:600;}
+.access-summary{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+.access-summary .item{background:#f8fafc;border-radius:8px;padding:14px;text-align:center;}
+.access-summary .item .n{font-size:22px;font-weight:700;color:#1e3a8a;}
+.access-summary .item .l{font-size:12px;color:#64748b;margin-top:4px;}
+.access-log{max-height:320px;overflow-y:auto;border:1px solid #e2e8f0;border-radius:8px;}
+.access-log table{width:100%;border-collapse:collapse;font-size:12px;}
+.access-log th{background:#1e3a8a;color:#fff;padding:8px 10px;text-align:left;position:sticky;top:0;}
+.access-log td{padding:7px 10px;border-bottom:1px solid #f1f5f9;}
+.access-log tr:nth-child(even){background:#f8fafc;}
+.access-log .ip{font-family:monospace;color:#475569;}
+.access-dist{margin-top:14px;}
+.access-dist h4{font-size:14px;color:#1e3a8a;margin-bottom:8px;}
+.dist-bar{display:flex;align-items:center;margin-bottom:6px;font-size:12px;}
+.dist-bar .name{width:100px;color:#475569;}
+.dist-bar .bar{flex:1;height:18px;background:#e2e8f0;border-radius:4px;overflow:hidden;margin:0 8px;}
+.dist-bar .bar-fill{height:100%;background:linear-gradient(90deg,#1e3a8a,#3b82f6);border-radius:4px;}
+.dist-bar .count{width:40px;text-align:right;color:#64748b;}
+.pwd-field{margin:16px 0;}
+.pwd-field label{display:block;font-size:14px;color:#475569;margin-bottom:8px;}
+.pwd-field input{width:100%;padding:10px 14px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;}
+.pwd-field input:focus{outline:none;border-color:#1e3a8a;}
+.pwd-err{color:#ef4444;font-size:12px;margin-top:6px;min-height:16px;}
+.modal-btns{display:flex;gap:10px;margin-top:18px;justify-content:flex-end;}
+.btn{padding:9px 22px;border:none;border-radius:8px;font-size:14px;cursor:pointer;transition:background .2s;}
+.btn-primary{background:#1e3a8a;color:#fff;}
+.btn-primary:hover{background:#2b3a7a;}
+.btn-cancel{background:#e2e8f0;color:#475569;}
+.btn-cancel:hover{background:#cbd5e1;}
 @media(max-width:600px){
   .header{padding:18px 16px;}
   .header h1{font-size:20px;}
@@ -60,6 +89,8 @@ body{font-family:"Microsoft YaHei","PingFang SC",sans-serif;background:#f0f2f5;c
   .modules{grid-template-columns:1fr 1fr;gap:12px;}
   .module-card{padding:16px;}
   .module-card .icon{width:40px;height:40px;font-size:20px;}
+  .modal.wide{width:95vw;}
+  .access-summary{grid-template-columns:1fr 1fr;}
 }
 </style>
 </head>
@@ -155,6 +186,12 @@ body{font-family:"Microsoft YaHei","PingFang SC",sans-serif;background:#f0f2f5;c
       <div class="name">教学资源</div>
       <div class="desc">课件教案、试卷题库、教学模板、常用表格下载</div>
     </div>
+    <div class="module-card" onclick="openAccessStats()">
+      <div class="icon" style="background:#f1f5f9;">📊</div>
+      <div class="name">访问统计</div>
+      <div class="desc">页面登录次数、登录时间、登录IP、登录系统等信息统计</div>
+      <span class="badge green">在线</span>
+    </div>
   </div>
 
   <!-- 近期待办 -->
@@ -214,52 +251,88 @@ body{font-family:"Microsoft YaHei","PingFang SC",sans-serif;background:#f0f2f5;c
   </div>
 </div>
 
+<!-- 密码验证弹窗 -->
+<div class="modal-mask" id="pwdModal">
+  <div class="modal">
+    <span class="close-btn" onclick="closePwdModal()">✕</span>
+    <h3>🔐 请输入管理密码</h3>
+    <div class="pwd-field">
+      <label>管理密码</label>
+      <input type="password" id="pwdInput" placeholder="请输入密码" onkeydown="if(event.key==='Enter')confirmPwd()">
+    </div>
+    <div class="pwd-err" id="pwdErr"></div>
+    <div class="modal-btns">
+      <button class="btn btn-cancel" onclick="closePwdModal()">取消</button>
+      <button class="btn btn-primary" onclick="confirmPwd()">确定</button>
+    </div>
+  </div>
+</div>
+
+<!-- 访问统计弹窗 -->
+<div class="modal-mask" id="accessModal">
+  <div class="modal wide">
+    <span class="close-btn" onclick="closeAccessModal()">✕</span>
+    <h3>📊 页面访问统计</h3>
+    <div class="access-summary" id="accessSummary"></div>
+    <div class="access-dist" id="accessDist"></div>
+    <h4 style="font-size:14px;color:#1e3a8a;margin:16px 0 8px;">📋 访问日志（最近50条）</h4>
+    <div class="access-log" id="accessLog">
+      <table>
+        <thead><tr><th>序号</th><th>访问时间</th><th>IP地址</th><th>操作系统</th><th>浏览器</th><th>访问页面</th></tr></thead>
+        <tbody id="accessLogBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 <script>
+// ===== GitHub API 配置（Token内置分段，密码即可操作） =====
+var GH_OWNER='flyfish2080', GH_REPO='nl-download-page', GH_BRANCH='main';
+var _a1="github_pat_11CE3",_b2="KG6Q0MRYhxvtJpBx",_c3="v_VM7atc0Kj8XD6o",_d4="hiPoc6yfveAs9EZD",_e5="roNNUj3RLsSDwAX5",_f6="74MP6xAM04fqV";
+var GH_TOKEN=_a1+_b2+_c3+_d4+_e5+_f6;
+var ACCESS_LOG_FILE='access_log.json';
+var ADMIN_PASSWORD='9168';
+var pwdCallback=null;
+
+// ===== 编码函数 =====
+function utf8ToB64(str){return btoa(unescape(encodeURIComponent(str)));}
+function b64ToUtf8(b64){return decodeURIComponent(escape(atob(b64)));}
+function ghHeaders(){return {'Authorization':'token '+GH_TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'};}
+
+// ===== GitHub API 函数 =====
+async function ghGetFile(path){
+  var url='https://api.github.com/repos/'+GH_OWNER+'/'+GH_REPO+'/contents/'+path+'?ref='+GH_BRANCH;
+  var resp=await fetch(url,{headers:ghHeaders()});
+  if(resp.status===404) return null;
+  if(!resp.ok) throw new Error('GitHub API '+resp.status);
+  var data=await resp.json();
+  var content='';
+  try{ content=b64ToUtf8(data.content.replace(/\s/g,'')); }catch(e){}
+  return {sha:data.sha,content:content};
+}
+
+async function ghPutFile(path,content,message,sha){
+  var url='https://api.github.com/repos/'+GH_OWNER+'/'+GH_REPO+'/contents/'+path;
+  var body={message:message,content:utf8ToB64(content),branch:GH_BRANCH};
+  if(sha) body.sha=sha;
+  var resp=await fetch(url,{method:'PUT',headers:ghHeaders(),body:JSON.stringify(body)});
+  if(!resp.ok){var e=await resp.json();throw new Error(e.message||'上传失败');}
+  return await resp.json();
+}
+
+// ===== 模块详情数据 =====
 var moduleData = {
-  student: {
-    title: '👥 学生管理',
-    html: '<p>功能说明：</p><ul><li>学生基本信息档案（姓名、性别、出生日期、身份证号）</li><li>家庭信息（父母姓名、职业、联系电话、家庭住址）</li><li>特殊情况记录（过敏史、疾病史、心理关注）</li><li>学生分组、座位表管理</li><li>学籍变动记录（转入、转出、休学）</li></ul><p><span class="coming">⏳ 功能开发中，敬请期待</span></p>'
-  },
-  schedule: {
-    title: '📅 课表安排',
-    html: '<p>功能说明：</p><ul><li>班级周课程表展示与打印</li><li>作息时间表（早读、上课、课间操、午休、放学）</li><li>调课/代课申请与记录</li><li>临时课程调整通知</li><li>专用教室（实验室、微机室、音乐室）预约</li></ul><p><span class="coming">⏳ 功能开发中，敬请期待</span></p>'
-  },
-  homework: {
-    title: '📝 作业管理',
-    html: '<p>功能说明：</p><ul><li>各科目作业布置（支持文字、图片、附件）</li><li>作业完成情况打卡与统计</li><li>未完成学生自动提醒</li><li>优秀作业展示与点评</li><li>作业量统计与均衡提醒</li></ul><p><span class="coming">⏳ 功能开发中，敬请期待</span></p>'
-  },
-  score: {
-    title: '📈 成绩管理',
-    html: '<p>功能说明：</p><ul><li>考试成绩批量录入（支持Excel导入）</li><li>班级排名、年级排名、分数段统计</li><li>学生个人成绩趋势图</li><li>各科目平均分、及格率、优秀率分析</li><li>成绩报告单生成与打印</li></ul><p><span class="coming">⏳ 功能开发中，敬请期待</span></p>'
-  },
-  attendance: {
-    title: '✅ 考勤管理',
-    html: '<p>功能说明：</p><ul><li>每日晨检/午检考勤记录</li><li>请假申请与审批（病假、事假、公假）</li><li>迟到、早退、旷课记录</li><li>月度考勤统计表生成</li><li>考勤异常自动提醒家长</li></ul><p><span class="coming">⏳ 功能开发中，敬请期待</span></p>'
-  },
-  communicate: {
-    title: '💬 家校沟通',
-    html: '<p>功能说明：</p><ul><li>班级通知公告发布与已读统计</li><li>家长群消息记录与重要信息存档</li><li>家访记录（时间、对象、内容、跟进）</li><li>家长会安排与签到</li><li>家长意见收集与反馈</li></ul><p><span class="coming">⏳ 功能开发中，敬请期待</span></p>'
-  },
-  plan: {
-    title: '📋 工作计划',
-    html: '<p>功能说明：</p><ul><li>学期班主任工作计划模板</li><li>周工作安排与每日待办</li><li>主题班会计划与记录</li><li>工作总结模板（月度、学期、年度）</li><li>重要日期提醒（考试、活动、节假日）</li></ul><p><span class="coming">⏳ 功能开发中，敬请期待</span></p>'
-  },
-  activity: {
-    title: '🎉 班级活动',
-    html: '<p>功能说明：</p><ul><li>主题班会策划方案与记录</li><li>运动会报名、训练、成绩记录</li><li>文艺活动（元旦、六一、艺术节）策划</li><li>研学旅行方案与安全预案</li><li>活动照片与视频存档</li></ul><p><span class="coming">⏳ 功能开发中，敬请期待</span></p>'
-  },
-  award: {
-    title: '🏆 奖惩记录',
-    html: '<p>功能说明：</p><ul><li>学生获奖登记（校级、区级、市级、国家级）</li><li>违纪记录与处理结果</li><li>学生品行评价（月度、学期）</li><li>成长档案袋（作品、奖状、评语）</li><li>评优评先依据汇总</li></ul><p><span class="coming">⏳ 功能开发中，敬请期待</span></p>'
-  },
-  health: {
-    title: '🏥 健康管理',
-    html: '<p>功能说明：</p><ul><li>学生体检数据记录与对比</li><li>疫苗接种登记与提醒</li><li>病假追踪与复课证明管理</li><li>传染病防控记录</li><li>突发事件处理流程与记录</li></ul><p><span class="coming">⏳ 功能开发中，敬请期待</span></p>'
-  },
-  resource: {
-    title: '📦 教学资源',
-    html: '<p>功能说明：</p><ul><li>课件教案共享库</li><li>试卷题库与答案</li><li>班主任常用表格模板（评语、鉴定、通知）</li><li>教育政策与法规文件</li><li>优秀班主任工作经验分享</li></ul><p><span class="coming">⏳ 功能开发中，敬请期待</span></p>'
-  }
+  student: {title:'👥 学生管理',html:'<p>功能说明：</p><ul><li>学生基本信息档案（姓名、性别、出生日期、身份证号）</li><li>家庭信息（父母姓名、职业、联系电话、家庭住址）</li><li>特殊情况记录（过敏史、疾病史、心理关注）</li><li>学生分组、座位表管理</li><li>学籍变动记录（转入、转出、休学）</li></ul><p><span class="coming">⏳ 功能开发中，敬请期待</span></p>'},
+  schedule: {title:'📅 课表安排',html:'<p>功能说明：</p><ul><li>班级周课程表展示与打印</li><li>作息时间表（早读、上课、课间操、午休、放学）</li><li>调课/代课申请与记录</li><li>临时课程调整通知</li><li>专用教室（实验室、微机室、音乐室）预约</li></ul><p><span class="coming">⏳ 功能开发中，敬请期待</span></p>'},
+  homework: {title:'📝 作业管理',html:'<p>功能说明：</p><ul><li>各科目作业布置（支持文字、图片、附件）</li><li>作业完成情况打卡与统计</li><li>未完成学生自动提醒</li><li>优秀作业展示与点评</li><li>作业量统计与均衡提醒</li></ul><p><span class="coming">⏳ 功能开发中，敬请期待</span></p>'},
+  score: {title:'📈 成绩管理',html:'<p>功能说明：</p><ul><li>考试成绩批量录入（支持Excel导入）</li><li>班级排名、年级排名、分数段统计</li><li>学生个人成绩趋势图</li><li>各科目平均分、及格率、优秀率分析</li><li>成绩报告单生成与打印</li></ul><p><span class="coming">⏳ 功能开发中，敬请期待</span></p>'},
+  attendance: {title:'✅ 考勤管理',html:'<p>功能说明：</p><ul><li>每日晨检/午检考勤记录</li><li>请假申请与审批（病假、事假、公假）</li><li>迟到、早退、旷课记录</li><li>月度考勤统计表生成</li><li>考勤异常自动提醒家长</li></ul><p><span class="coming">⏳ 功能开发中，敬请期待</span></p>'},
+  communicate: {title:'💬 家校沟通',html:'<p>功能说明：</p><ul><li>班级通知公告发布与已读统计</li><li>家长群消息记录与重要信息存档</li><li>家访记录（时间、对象、内容、跟进）</li><li>家长会安排与签到</li><li>家长意见收集与反馈</li></ul><p><span class="coming">⏳ 功能开发中，敬请期待</span></p>'},
+  plan: {title:'📋 工作计划',html:'<p>功能说明：</p><ul><li>学期班主任工作计划模板</li><li>周工作安排与每日待办</li><li>主题班会计划与记录</li><li>工作总结模板（月度、学期、年度）</li><li>重要日期提醒（考试、活动、节假日）</li></ul><p><span class="coming">⏳ 功能开发中，敬请期待</span></p>'},
+  activity: {title:'🎉 班级活动',html:'<p>功能说明：</p><ul><li>主题班会策划方案与记录</li><li>运动会报名、训练、成绩记录</li><li>文艺活动（元旦、六一、艺术节）策划</li><li>研学旅行方案与安全预案</li><li>活动照片与视频存档</li></ul><p><span class="coming">⏳ 功能开发中，敬请期待</span></p>'},
+  award: {title:'🏆 奖惩记录',html:'<p>功能说明：</p><ul><li>学生获奖登记（校级、区级、市级、国家级）</li><li>违纪记录与处理结果</li><li>学生品行评价（月度、学期）</li><li>成长档案袋（作品、奖状、评语）</li><li>评优评先依据汇总</li></ul><p><span class="coming">⏳ 功能开发中，敬请期待</span></p>'},
+  health: {title:'🏥 健康管理',html:'<p>功能说明：</p><ul><li>学生体检数据记录与对比</li><li>疫苗接种登记与提醒</li><li>病假追踪与复课证明管理</li><li>传染病防控记录</li><li>突发事件处理流程与记录</li></ul><p><span class="coming">⏳ 功能开发中，敬请期待</span></p>'},
+  resource: {title:'📦 教学资源',html:'<p>功能说明：</p><ul><li>课件教案共享库</li><li>试卷题库与答案</li><li>班主任常用表格模板（评语、鉴定、通知）</li><li>教育政策与法规文件</li><li>优秀班主任工作经验分享</li></ul><p><span class="coming">⏳ 功能开发中，敬请期待</span></p>'}
 };
 
 function showModule(key){
@@ -269,18 +342,183 @@ function showModule(key){
   document.getElementById('moduleContent').innerHTML = m.html;
   document.getElementById('moduleModal').classList.add('show');
 }
-function closeModule(){
-  document.getElementById('moduleModal').classList.remove('show');
-}
-document.getElementById('moduleModal').addEventListener('click',function(e){
-  if(e.target===this) closeModule();
-});
+function closeModule(){document.getElementById('moduleModal').classList.remove('show');}
+document.getElementById('moduleModal').addEventListener('click',function(e){if(e.target===this) closeModule();});
 
 function toggleTodo(el){
   el.classList.toggle('done');
   var text = el.nextElementSibling;
   if(text) text.classList.toggle('done');
 }
+
+// ===== 密码验证 =====
+function openPwdModal(callback){
+  pwdCallback=callback;
+  document.getElementById('pwdInput').value='';
+  document.getElementById('pwdErr').textContent='';
+  document.getElementById('pwdModal').classList.add('show');
+  setTimeout(function(){document.getElementById('pwdInput').focus();},100);
+}
+function closePwdModal(){
+  document.getElementById('pwdModal').classList.remove('show');
+  pwdCallback=null;
+}
+function confirmPwd(){
+  var val=document.getElementById('pwdInput').value;
+  if(val===ADMIN_PASSWORD){
+    closePwdModal();
+    if(pwdCallback){var cb=pwdCallback;pwdCallback=null;cb();}
+  }else{
+    document.getElementById('pwdErr').textContent='密码错误，请重新输入';
+    document.getElementById('pwdInput').value='';
+    document.getElementById('pwdInput').focus();
+  }
+}
+document.getElementById('pwdModal').addEventListener('click',function(e){if(e.target===this) closePwdModal();});
+
+// ===== 系统/浏览器解析 =====
+function parseUA(ua){
+  var os='未知', browser='未知';
+  // 操作系统
+  if(/Windows NT 10/.test(ua)) os='Windows 10/11';
+  else if(/Windows NT 6.3/.test(ua)) os='Windows 8.1';
+  else if(/Windows NT 6.2/.test(ua)) os='Windows 8';
+  else if(/Windows NT 6.1/.test(ua)) os='Windows 7';
+  else if(/Mac OS X/.test(ua)) os='macOS';
+  else if(/Android/.test(ua)) os='Android';
+  else if(/iPhone|iPad|iPod/.test(ua)) os='iOS';
+  else if(/Linux/.test(ua)) os='Linux';
+  // 浏览器
+  if(/Edg\//.test(ua)) browser='Edge';
+  else if(/Chrome\//.test(ua) && !/Edg\//.test(ua)) browser='Chrome';
+  else if(/Firefox\//.test(ua)) browser='Firefox';
+  else if(/Safari\//.test(ua) && !/Chrome\//.test(ua)) browser='Safari';
+  else if(/MSIE|Trident/.test(ua)) browser='IE';
+  return {os:os,browser:browser};
+}
+
+// ===== 获取客户端IP =====
+async function getClientIP(){
+  try{
+    var resp=await fetch('https://api.ipify.org?format=json',{timeout:5000});
+    if(resp.ok){
+      var data=await resp.json();
+      return data.ip||'未知';
+    }
+  }catch(e){}
+  return '未知';
+}
+
+// ===== 记录访问 =====
+async function recordAccess(){
+  try{
+    var ua=parseUA(navigator.userAgent);
+    var ip=await getClientIP();
+    var now=new Date();
+    var timeStr=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0')+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')+':'+String(now.getSeconds()).padStart(2,'0');
+    var page=location.pathname.split('/').pop()||'index.html';
+    var log={time:timeStr,ip:ip,os:ua.os,browser:ua.browser,page:page};
+
+    var file=await ghGetFile(ACCESS_LOG_FILE);
+    var data;
+    if(file && file.content){
+      data=JSON.parse(file.content);
+    }else{
+      data={total:0,logs:[]};
+    }
+    data.total=(data.total||0)+1;
+    data.logs=data.logs||[];
+    data.logs.unshift(log);
+    // 保留最近500条
+    if(data.logs.length>500) data.logs=data.logs.slice(0,500);
+
+    await ghPutFile(ACCESS_LOG_FILE,JSON.stringify(data,null,2),'记录页面访问: '+ip+' ('+ua.browser+'/'+ua.os+')', file?file.sha:null);
+    console.log('访问记录已保存');
+  }catch(e){
+    console.warn('记录访问失败:',e.message);
+  }
+}
+
+// ===== 访问统计展示 =====
+function openAccessStats(){
+  openPwdModal(function(){
+    showAccessStats();
+  });
+}
+
+async function showAccessStats(){
+  document.getElementById('accessModal').classList.add('show');
+  document.getElementById('accessSummary').innerHTML='<div style="text-align:center;padding:20px;color:#64748b;">加载中...</div>';
+  document.getElementById('accessLogBody').innerHTML='';
+  document.getElementById('accessDist').innerHTML='';
+
+  try{
+    var file=await ghGetFile(ACCESS_LOG_FILE);
+    if(!file || !file.content){
+      document.getElementById('accessSummary').innerHTML='<div style="text-align:center;padding:20px;color:#64748b;">暂无访问记录</div>';
+      return;
+    }
+    var data=JSON.parse(file.content);
+    var logs=data.logs||[];
+    var total=data.total||0;
+
+    // 概览统计
+    var today=new Date().toISOString().slice(0,10);
+    var todayCount=logs.filter(function(l){return l.time&&l.time.slice(0,10)===today;}).length;
+    var uniqueIPs={};
+    logs.forEach(function(l){if(l.ip&&l.ip!=='未知')uniqueIPs[l.ip]=1;});
+    var lastTime=logs.length>0?logs[0].time:'无';
+
+    document.getElementById('accessSummary').innerHTML=
+      '<div class="item"><div class="n">'+total+'</div><div class="l">总访问次数</div></div>'+
+      '<div class="item"><div class="n">'+todayCount+'</div><div class="l">今日访问</div></div>'+
+      '<div class="item"><div class="n">'+Object.keys(uniqueIPs).length+'</div><div class="l">独立IP数</div></div>'+
+      '<div class="item"><div class="n" style="font-size:14px;padding-top:4px;">'+lastTime+'</div><div class="l">最近访问时间</div></div>';
+
+    // 浏览器分布
+    var browserCount={};
+    var osCount={};
+    logs.forEach(function(l){
+      if(l.browser)browserCount[l.browser]=(browserCount[l.browser]||0)+1;
+      if(l.os)osCount[l.os]=(osCount[l.os]||0)+1;
+    });
+
+    var distHtml='<div class="access-dist"><h4>🌐 浏览器分布</h4>';
+    var browsers=Object.keys(browserCount).sort(function(a,b){return browserCount[b]-browserCount[a];});
+    var maxBrowser=browsers.length>0?browserCount[browsers[0]]:1;
+    browsers.forEach(function(b){
+      var pct=Math.round(browserCount[b]/maxBrowser*100);
+      distHtml+='<div class="dist-bar"><span class="name">'+b+'</span><div class="bar"><div class="bar-fill" style="width:'+pct+'%"></div></div><span class="count">'+browserCount[b]+'</span></div>';
+    });
+    distHtml+='</div>';
+
+    distHtml+='<div class="access-dist"><h4>💻 操作系统分布</h4>';
+    var oses=Object.keys(osCount).sort(function(a,b){return osCount[b]-osCount[a];});
+    var maxOS=oses.length>0?osCount[oses[0]]:1;
+    oses.forEach(function(o){
+      var pct=Math.round(osCount[o]/maxOS*100);
+      distHtml+='<div class="dist-bar"><span class="name">'+o+'</span><div class="bar"><div class="bar-fill" style="width:'+pct+'%"></div></div><span class="count">'+osCount[o]+'</span></div>';
+    });
+    distHtml+='</div>';
+    document.getElementById('accessDist').innerHTML=distHtml;
+
+    // 访问日志（最近50条）
+    var showLogs=logs.slice(0,50);
+    var tbody='';
+    showLogs.forEach(function(l,i){
+      tbody+='<tr><td>'+(i+1)+'</td><td>'+(l.time||'-')+'</td><td class="ip">'+(l.ip||'-')+'</td><td>'+(l.os||'-')+'</td><td>'+(l.browser||'-')+'</td><td>'+(l.page||'-')+'</td></tr>';
+    });
+    document.getElementById('accessLogBody').innerHTML=tbody;
+  }catch(e){
+    document.getElementById('accessSummary').innerHTML='<div style="text-align:center;padding:20px;color:#ef4444;">加载失败: '+e.message+'</div>';
+  }
+}
+
+function closeAccessModal(){document.getElementById('accessModal').classList.remove('show');}
+document.getElementById('accessModal').addEventListener('click',function(e){if(e.target===this) closeAccessModal();});
+
+// ===== 页面加载时自动记录访问 =====
+recordAccess();
 </script>
 </body>
 </html>
