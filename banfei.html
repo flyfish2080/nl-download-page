@@ -122,7 +122,7 @@ tbody tr:hover{background:#eef2ff;}
 <div class="back-link">
 <a href="./">返回首页</a>
 </div>
-<div class="footer">牛来工作小助手 · 内网办公工具</div>
+<div class="footer">牛来工作小助手 · 内网办公工具 修改建议:178941631@qq.com</div>
 </div>
 
 <div class="modal-mask" id="importModal">
@@ -372,7 +372,7 @@ function exportText(){
     lines.push(result.aoa[i].join('\t'));
   }
   lines.push('返回首页');
-  lines.push('牛来工作小助手 · 内网办公工具');
+  lines.push('牛来工作小助手 · 内网办公工具 修改建议:178941631@qq.com');
   var content=lines.join('\r\n');
   var blob=new Blob(['\ufeff'+content],{type:'text/plain;charset=utf-8'});
   var url=URL.createObjectURL(blob);
