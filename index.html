@@ -267,7 +267,7 @@ function confirmPwd(){
     document.getElementById('pwdInput').focus();
   }
 }
-document.getElementById('pwdModal').addEventListener('click',function(e){if(e.target===this) closePwdModal();});
+var _pm=document.getElementById('pwdModal');if(_pm)_pm.addEventListener('click',function(e){if(e.target===this) closePwdModal();});
 
 function openAccessStats(){
   openPwdModal(function(){showAccessStats();});
@@ -330,7 +330,7 @@ async function showAccessStats(){
   }
 }
 function closeAccessModal(){document.getElementById('accessModal').classList.remove('show');}
-document.getElementById('accessModal').addEventListener('click',function(e){if(e.target===this) closeAccessModal();});
+var _am=document.getElementById('accessModal');if(_am)_am.addEventListener('click',function(e){if(e.target===this) closeAccessModal();});
 
 </script>
 
