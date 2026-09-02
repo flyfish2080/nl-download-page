@@ -945,10 +945,6 @@ async function ghGetFile(path){
   var content='';
   try{ content=b64ToUtf8(data.content.replace(/\s/g,'')); }catch(e){}
   return {sha:data.sha,content:content};
-};
-
-
-
 }
 
 
