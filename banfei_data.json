@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-09-03T12:51:18.017Z",
+  "updated": "2026-09-03T12:51:36.999Z",
   "rows": [
     {
       "id": "base_0",
@@ -32,17 +32,6 @@
           "url": "https://flyfish2080.github.io/nl-download-page/receipts/r_1788313616902_apyt.jpg"
         }
       ]
-    },
-    {
-      "id": "imp_1788439878016_9uaxga",
-      "date": "2026年9月1日",
-      "type": "收入",
-      "project": "期初收缴班费（每人100元×45人）",
-      "income": 4500,
-      "expense": 0,
-      "operator": "段砚科爸爸",
-      "remark": "新学期收缴",
-      "receipts": []
     },
     {
       "id": "imp_1788439878016_kpcgfd",
