@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-09-02T02:23:28.091Z",
+  "updated": "2026-09-03T12:51:18.017Z",
   "rows": [
     {
       "id": "base_0",
@@ -32,6 +32,50 @@
           "url": "https://flyfish2080.github.io/nl-download-page/receipts/r_1788313616902_apyt.jpg"
         }
       ]
+    },
+    {
+      "id": "imp_1788439878016_9uaxga",
+      "date": "2026年9月1日",
+      "type": "收入",
+      "project": "期初收缴班费（每人100元×45人）",
+      "income": 4500,
+      "expense": 0,
+      "operator": "段砚科爸爸",
+      "remark": "新学期收缴",
+      "receipts": []
+    },
+    {
+      "id": "imp_1788439878016_kpcgfd",
+      "date": "2026年9月1日",
+      "type": "支出",
+      "project": "购买海绵拖把1×25元、扫把5×25元",
+      "income": 0,
+      "expense": 150,
+      "operator": "吴周闻妈妈",
+      "remark": "",
+      "receipts": []
+    },
+    {
+      "id": "imp_1788439878016_bypdh5",
+      "date": "",
+      "type": "支出",
+      "project": "写字本",
+      "income": 0,
+      "expense": 27.6,
+      "operator": "",
+      "remark": "",
+      "receipts": []
+    },
+    {
+      "id": "imp_1788439878016_kghb7b",
+      "date": "",
+      "type": "支出",
+      "project": "数学本",
+      "income": 0,
+      "expense": 82.8,
+      "operator": "",
+      "remark": "",
+      "receipts": []
     }
   ]
 }
