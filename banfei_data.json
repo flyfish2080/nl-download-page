@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-09-03T12:51:36.999Z",
+  "updated": "2026-09-03T12:51:48.660Z",
   "rows": [
     {
       "id": "base_0",
@@ -32,17 +32,6 @@
           "url": "https://flyfish2080.github.io/nl-download-page/receipts/r_1788313616902_apyt.jpg"
         }
       ]
-    },
-    {
-      "id": "imp_1788439878016_kpcgfd",
-      "date": "2026年9月1日",
-      "type": "支出",
-      "project": "购买海绵拖把1×25元、扫把5×25元",
-      "income": 0,
-      "expense": 150,
-      "operator": "吴周闻妈妈",
-      "remark": "",
-      "receipts": []
     },
     {
       "id": "imp_1788439878016_bypdh5",
