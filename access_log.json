@@ -1,6 +1,13 @@
 {
-  "total": 29,
+  "total": 30,
   "logs": [
+    {
+      "time": "2026-09-07 15:54:53",
+      "ip": "未知",
+      "os": "Windows 10/11",
+      "browser": "Chrome",
+      "page": "index.html"
+    },
     {
       "time": "2026-09-07 15:47:46",
       "ip": "未知",
