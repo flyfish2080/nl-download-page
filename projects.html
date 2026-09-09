@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>公司开发系统作品集 · flyfish2080</title>
+<meta name="description" content="个人开发软件作品集：牛来工作小助手、QMT 量化交易系统、new_tdx 通达信预警自动交易。">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family:"Microsoft YaHei","PingFang SC",sans-serif;
+    background:linear-gradient(160deg,#f0f2f7 0%,#e3e9f5 100%);
+    color:#1e2a5a; min-height:100vh;
+  }
+  .page { max-width:860px; margin:0 auto; padding:32px 20px 48px; }
+  .header { text-align:center; padding:18px 0 8px; }
+  .logo {
+    display:inline-block; width:72px; height:72px; line-height:72px; font-size:34px;
+    background:linear-gradient(135deg,#1e2a5a,#2a3a6a); color:#fff; border-radius:18px;
+    box-shadow:0 8px 24px rgba(30,42,90,.25);
+  }
+  .header h1 { margin-top:16px; font-size:26px; letter-spacing:1px; }
+  .header .sub { margin-top:6px; color:#5b6b8c; font-size:14px; }
+  .back-link { display:inline-block; margin-top:14px; font-size:13px; color:#2563eb; text-decoration:none; }
+  .back-link:hover { text-decoration:underline; }
+  .card {
+    background:#fff; border-radius:14px; padding:24px; margin-top:22px;
+    box-shadow:0 4px 18px rgba(30,42,90,.08);
+  }
+  .card .tag {
+    display:inline-block; font-size:12px; padding:3px 10px; border-radius:20px;
+    background:#eef1f8; color:#1e40af; margin-left:8px; vertical-align:2px;
+  }
+  .card h2 { font-size:19px; color:#1e2a5a; }
+  .card .intro { margin-top:10px; font-size:14px; color:#475569; line-height:1.8; }
+  .card .tech { margin-top:12px; font-size:12px; color:#6b7280; }
+  .card .tech b { color:#1e40af; }
+  .feat { margin-top:16px; }
+  .feat h3 {
+    font-size:14px; color:#1e40af; margin:16px 0 6px;
+    border-left:4px solid #3b82f6; padding-left:10px;
+  }
+  .feat ul { list-style:none; }
+  .feat li {
+    position:relative; padding:5px 0 5px 22px; font-size:14px; line-height:1.7; color:#33415c;
+  }
+  .feat li::before { content:"✔"; position:absolute; left:0; top:5px; color:#2563eb; font-size:12px; }
+  .footer { text-align:center; margin-top:30px; font-size:13px; color:#5b6b8c; }
+  .footer a { color:#2563eb; text-decoration:none; }
+  .footer a:hover { text-decoration:underline; }
+  @media(max-width:560px){ .page { padding:20px 14px 36px; } }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="logo">🚀</div>
+    <h1>公司开发系统作品集</h1>
+    <div class="sub">量化交易 · 办公自动化 · 数据应用</div>
+    <a class="back-link" href="https://www.dmmmw.site/">← 返回首页</a>
+  </div>
+
+  <!-- 项目一：牛来工作小助手 -->
+  <div class="card">
+    <h2>🖥️ 牛来工作小助手 <span class="tag">已发布</span></h2>
+    <div class="intro">
+      面向基层政务与企事业单位的<b>纯内网办公一体化工具</b>，无需外网、无需云服务器，单机即可完成日常办公、任务管理、报表填报、数据分析与知识库检索。
+    </div>
+    <div class="feat">
+      <h3>核心功能</h3>
+      <ul>
+        <li>日常办公：集中管理常用系统/网址，一键打开，账号密码加密保存</li>
+        <li>工作安排：待办任务创建、定时提醒、完成后自动归档历史台账</li>
+        <li>定时任务：按设定时间自动关机、重启、弹窗提醒、启动指定程序</li>
+        <li>图文处理：OCR 图片文字识别、doc/docx↔PDF 互转、公文模板生成</li>
+        <li>数据分析：导入报表生成风险分析报告、多表格数据比对</li>
+        <li>报表管理：内网填报系统（127.0.0.1:8090），支持多文件/多工作表/公式识别、多账号多单位在线填报、任务下发与审核汇总</li>
+        <li>构建知识库：个人文档上传组建文库，快速检索，本地智能问答</li>
+        <li>系统管理：数据一键备份与还原、数据文件查看</li>
+      </ul>
+    </div>
+    <div class="tech"><b>技术栈：</b>Python 3.12 · PyQt 桌面端 · Flask 内网服务 · SQLite 存储 · openpyxl/xlrd 双引擎 · PaddleOCR · PyInstaller 打包</div>
+    <div class="feat" style="margin-top:10px;">
+      <a href="index.html" style="color:#2563eb;font-size:14px;">前往下载 →</a>
+    </div>
+  </div>
+
+  <!-- 项目二：QMT 量化交易系统 -->
+  <div class="card">
+    <h2>📈 QMT 量化交易系统 <span class="tag">三易系列</span></h2>
+    <div class="intro">
+      基于<b>迅投 QMT 极速策略交易系统</b>开发的实盘自动量化交易策略，覆盖「全市场选股 → 尾盘自动买入 → 持仓智能监控 → 多档止盈止损 → 每日统计归档」完整闭环，支持普通账户与信用账户（融资融券）。
+    </div>
+    <div class="feat">
+      <h3>自动选股</h3>
+      <ul>
+        <li>全市场扫描沪深 A 股，自动排除科创板（688）与 ST 股</li>
+        <li>强势形态识别：涨幅 4.5%~30%、K 线形态紧凑（上下影线收窄）、量比 0~1.1、阳线确认</li>
+        <li>每 55 秒/5 分钟定时扫描，股票按涨幅排序输出候选池</li>
+      </ul>
+      <h3>自动交易</h3>
+      <ul>
+        <li>尾盘 14:40-14:43 自动买入符合条件的股票（普通/融资），单日最多 3 只</li>
+        <li>ETF 固定池轮动：44 只主流跨境/行业/货币 ETF，14:50-14:53 自动买入</li>
+        <li>空仓保护：资金闲置时自动买入货币 ETF（511090）提升资金利用率</li>
+      </ul>
+      <h3>持仓管理</h3>
+      <ul>
+        <li>实时监控每只持仓最高价/最低价，动态计算收益率与回撤幅度</li>
+        <li>多档智能止盈：收益与回撤联动（如收益&gt;8% 回撤≥2%、收益5% 回撤≥2% 等多档）</li>
+        <li>严格止损：跌幅≥2% 清仓、14:30 未创新高卖出、14:40 弱势卖出</li>
+      </ul>
+      <h3>风控体系</h3>
+      <ul>
+        <li>资金回撤≥10% 自动停止所有买入操作</li>
+        <li>自成交保护：买入后 60 秒内禁止卖出</li>
+        <li>持仓不足 15 分钟禁止卖出，避免频繁交易</li>
+        <li>委托超时 30 秒自动撤单，并以最新价格重新委托</li>
+        <li>内置 2026 年 A 股节假日日历与调休上班日识别，自动跳过休市日</li>
+      </ul>
+      <h3>统计归档</h3>
+      <ul>
+        <li>每日收盘自动生成当日交易统计：交易次数、胜率、盈亏金额</li>
+        <li>累计盈亏统计与交易明细记录自动保存至本地</li>
+      </ul>
+    </div>
+    <div class="tech"><b>技术栈：</b>Python · QMT API（xtquant）· 实盘自动交易 · 多档止盈止损模型</div>
+  </div>
+
+  <!-- 项目三：new_tdx 通达信预警自动交易 -->
+  <div class="card">
+    <h2>⚡ new_tdx 通达信预警自动交易 <span class="tag">信号联动</span></h2>
+    <div class="intro">
+      打通<b>通达信（TDX）预警系统</b>与<b>QMT 交易终端</b>的自动交易通道：通达信条件选股/预警触发后，将信号写入文件，QMT 侧自动监控并<b>立即执行买卖委托</b>，实现「选股在前、执行在后」的全自动交易。
+    </div>
+    <div class="feat">
+      <h3>核心功能</h3>
+      <ul>
+        <li>信号文件监控：每 5 秒轮询通达信预警输出文件，秒级响应新信号</li>
+        <li>智能信号解析：自动解析股票代码、名称、信号时间、触发价格、涨跌幅、成交量、信号类型</li>
+        <li>布林带信号识别：自动识别「布林带买入/卖出条件选股」信号并执行对应委托</li>
+        <li>按金额定额下单：默认单笔 2 万元买入，可配置调整</li>
+        <li>市场代码自动转换：6 开头→沪市（SH）、0/3 开头→深市（SZ），自动格式化为 QMT 标准代码</li>
+        <li>持仓联动卖出：收到卖出信号自动匹配持仓数量执行卖出，无持仓自动跳过</li>
+        <li>增量处理：仅处理新增信号行，避免重复交易</li>
+      </ul>
+    </div>
+    <div class="tech"><b>技术栈：</b>Python · 通达信预警系统 · QMT 交易 API · 定时器文件监控</div>
+  </div>
+
+  <div class="footer">
+    <div>更多作品持续更新中</div>
+    <div style="margin-top:8px;"><a href="https://www.dmmmw.site/">返回首页</a> · 如有使用问题，请联系发布单位。邮箱:178941631@qq.com</div>
+  </div>
+
+</div>
+</body>
+</html>
